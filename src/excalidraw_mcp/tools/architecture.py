@@ -27,16 +27,22 @@ def register_architecture_tools(mcp):
             connections = []
 
         # Apply layer colors to components (work on copies to avoid mutating input)
+        # Components can have their own color (e.g., "redis", "postgres") that overrides layer color
         for layer in layers:
             layer_color = layer.get("color", "blue")
-            color = get_color(layer_color)
+            layer_c = get_color(layer_color)
             new_comps = []
             for comp in layer.get("components", []):
                 c = dict(comp)
-                if "bg" not in c:
-                    c["bg"] = color["bg"]
-                if "stroke" not in c:
-                    c["stroke"] = color["stroke"]
+                # Component-specific color takes priority over layer color
+                comp_color_name = c.pop("color", None)
+                if comp_color_name:
+                    comp_c = get_color(comp_color_name)
+                    c.setdefault("bg", comp_c["bg"])
+                    c.setdefault("stroke", comp_c["stroke"])
+                else:
+                    c.setdefault("bg", layer_c["bg"])
+                    c.setdefault("stroke", layer_c["stroke"])
                 new_comps.append(c)
             layer["components"] = new_comps
 
@@ -59,12 +65,16 @@ def register_architecture_tools(mcp):
             all_elements.extend([shape, text])
             shape_map[item["label"]] = shape
 
-        # Arrows
+        # Arrows (with optional label and style)
         for conn in connections:
             start = shape_map.get(conn.get("from"))
             end = shape_map.get(conn.get("to"))
             if start and end:
-                result = create_arrow(None, start, end)
+                result = create_arrow(
+                    None, start, end,
+                    label=conn.get("label"),
+                    strokeStyle=conn.get("style", "solid"),
+                )
                 all_elements.extend(result)
 
         path = output_path or "/tmp/architecture.excalidraw"
