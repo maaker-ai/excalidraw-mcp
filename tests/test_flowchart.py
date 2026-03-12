@@ -376,3 +376,35 @@ def test_flowchart_mixed_shapes_e2e():
         assert len(rectangles) == 1, f"Expected 1 rectangle, got {len(rectangles)}"
     finally:
         os.unlink(path)
+
+
+# ========== Iteration 3: Edge stroke styles ==========
+
+def test_edge_style_field():
+    """FlowchartEdge should accept a style field."""
+    from excalidraw_mcp.tools.flowchart import FlowchartEdge
+    edge = FlowchartEdge(**{"from": "A", "to": "B", "style": "dashed"})
+    assert edge.style == "dashed"
+
+    edge_default = FlowchartEdge(**{"from": "A", "to": "B"})
+    assert edge_default.style == "solid"
+
+
+def test_arrow_dashed_style():
+    """Arrow with dashed style should have strokeStyle='dashed'."""
+    shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
+    shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=300, y=0, width=200, height=70)
+
+    result = create_arrow("arr1", shape1, shape2, strokeStyle="dashed")
+    arrow = result[0]
+    assert arrow["strokeStyle"] == "dashed"
+
+
+def test_arrow_dotted_style():
+    """Arrow with dotted style should have strokeStyle='dotted'."""
+    shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
+    shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=300, y=0, width=200, height=70)
+
+    result = create_arrow("arr1", shape1, shape2, strokeStyle="dotted")
+    arrow = result[0]
+    assert arrow["strokeStyle"] == "dotted"

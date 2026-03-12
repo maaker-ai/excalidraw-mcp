@@ -13,6 +13,7 @@ class FlowchartEdge(BaseModel):
     from_node: str = Field(alias="from", description="Source node label or index (0-based)")
     to_node: str = Field(alias="to", description="Target node label or index (0-based)")
     label: Optional[str] = Field(default=None, description="Edge label")
+    style: str = Field(default="solid", description="Stroke style: solid (default), dashed, dotted")
 
     model_config = {"populate_by_name": True}
 
@@ -92,7 +93,7 @@ def register_flowchart_tools(mcp: FastMCP):
             start_el = shape_map.get(edge.from_node)
             end_el = shape_map.get(edge.to_node)
             if start_el and end_el:
-                result = create_arrow(None, start_el, end_el, label=edge.label)
+                result = create_arrow(None, start_el, end_el, label=edge.label, strokeStyle=edge.style)
                 all_elements.extend(result)
 
         # 6. Add title if provided
