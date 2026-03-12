@@ -39,6 +39,7 @@ pip install maaker-excalidraw-mcp
 |------|-------------|
 | `create_flowchart` | Create flowcharts with Sugiyama hierarchical layout — handles branches, merges, cycles |
 | `create_architecture_diagram` | Create layered architecture diagrams |
+| `create_sequence_diagram` | Create UML-style sequence diagrams with participants, messages, lifelines |
 | `modify_diagram` | Add/remove nodes and connections in existing diagrams |
 | `read_diagram` | Analyze existing `.excalidraw` files |
 | `export_diagram` | Export to SVG |
