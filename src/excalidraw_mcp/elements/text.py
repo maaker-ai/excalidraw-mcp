@@ -113,11 +113,20 @@ def create_labeled_shape(
     if id is None:
         id = _gen_id()
 
-    text_width = estimate_text_width(label, font_size)
+    # Handle multi-line labels
+    lines = label.split("\n")
+    line_widths = [estimate_text_width(line, font_size) for line in lines]
+    text_width = max(line_widths) if line_widths else estimate_text_width(label, font_size)
     if width is None:
         width = max(text_width + 60, 200)
 
-    text_height = font_size * 1.4
+    line_height = font_size * 1.4
+    text_height = line_height * len(lines)
+
+    # Auto-adjust container height for multi-line text
+    if len(lines) > 1:
+        min_height = text_height + 30  # padding
+        height = max(height, min_height)
 
     # 生成文字 id
     text_id = id + "_text"

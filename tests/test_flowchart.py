@@ -539,3 +539,37 @@ def test_arrow_bidirectional():
     arrow = result[0]
     assert arrow["startArrowhead"] == "arrow"
     assert arrow["endArrowhead"] == "arrow"
+
+
+# ========== Iteration 6: Multi-line node labels ==========
+
+def test_multiline_label_height():
+    """Multi-line labels should produce taller nodes."""
+    shape_single, text_single = create_labeled_shape(
+        "rectangle", id="s1", label="Single", x=0, y=0,
+    )
+    shape_multi, text_multi = create_labeled_shape(
+        "rectangle", id="s2", label="Line 1\nLine 2\nLine 3", x=0, y=0,
+    )
+    # Multi-line should have greater height
+    assert shape_multi["height"] > shape_single["height"]
+
+
+def test_multiline_text_content():
+    """Multi-line text element should contain newlines."""
+    shape, text = create_labeled_shape(
+        "rectangle", id="s1", label="API\nServer", x=0, y=0,
+    )
+    assert "\n" in text["text"]
+    assert text["text"] == "API\nServer"
+
+
+def test_multiline_width_uses_longest_line():
+    """Width should be based on the longest line."""
+    shape, text = create_labeled_shape(
+        "rectangle", id="s1", label="Short\nThis is a longer line", x=0, y=0,
+    )
+    from excalidraw_mcp.elements.text import estimate_text_width
+    long_width = estimate_text_width("This is a longer line", 20)
+    # Shape width should accommodate the longest line
+    assert shape["width"] >= long_width
