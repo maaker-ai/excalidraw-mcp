@@ -516,3 +516,26 @@ def test_flowchart_with_groups_e2e():
         assert "Backend" in text_values
     finally:
         os.unlink(path)
+
+
+# ========== Iteration 5: Bidirectional arrows ==========
+
+def test_edge_bidirectional_field():
+    """FlowchartEdge should accept a bidirectional field."""
+    from excalidraw_mcp.tools.flowchart import FlowchartEdge
+    edge = FlowchartEdge(**{"from": "A", "to": "B", "bidirectional": True})
+    assert edge.bidirectional is True
+
+    edge_default = FlowchartEdge(**{"from": "A", "to": "B"})
+    assert edge_default.bidirectional is False
+
+
+def test_arrow_bidirectional():
+    """Bidirectional arrow should have arrowheads on both ends."""
+    shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
+    shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=300, y=0, width=200, height=70)
+
+    result = create_arrow("arr1", shape1, shape2, startArrowhead="arrow")
+    arrow = result[0]
+    assert arrow["startArrowhead"] == "arrow"
+    assert arrow["endArrowhead"] == "arrow"
