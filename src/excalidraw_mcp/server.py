@@ -24,6 +24,7 @@ from excalidraw_mcp.tools.wireframe import register_wireframe_tools
 from excalidraw_mcp.tools.org_chart import register_org_chart_tools
 from excalidraw_mcp.tools.swot import register_swot_tools
 from excalidraw_mcp.tools.help import register_help_tools
+from excalidraw_mcp.tools.table import register_table_tools
 from excalidraw_mcp.tools.unified import register_unified_tools
 
 register_flowchart_tools(mcp)
@@ -46,6 +47,7 @@ register_swot_tools(mcp)
 register_modify_tools(mcp)
 register_export_tools(mcp)
 register_read_tools(mcp)
+register_table_tools(mcp)
 register_help_tools(mcp)
 register_unified_tools(mcp)
 
