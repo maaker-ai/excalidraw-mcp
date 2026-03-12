@@ -1,7 +1,7 @@
 [project]
 name = "maaker-excalidraw-mcp"
-version = "0.4.0"
-description = "Generate 20+ types of Excalidraw diagrams with auto-layout. Flowcharts, sequence, architecture, mind maps, ER, class, state, timeline, pie charts, kanban, wireframes, and more."
+version = "0.5.0"
+description = "Generate 25+ types of Excalidraw diagrams with auto-layout. Flowcharts, sequence, architecture, mind maps, ER, class, state, timeline, pie/bar/line/radar charts, kanban, wireframes, decision trees, and more."
 readme = "README.md"
 license = {text = "MIT"}
 requires-python = ">=3.10"
