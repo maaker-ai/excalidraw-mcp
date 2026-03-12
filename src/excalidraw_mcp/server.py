@@ -23,6 +23,7 @@ from excalidraw_mcp.tools.user_journey import register_user_journey_tools
 from excalidraw_mcp.tools.wireframe import register_wireframe_tools
 from excalidraw_mcp.tools.org_chart import register_org_chart_tools
 from excalidraw_mcp.tools.swot import register_swot_tools
+from excalidraw_mcp.tools.help import register_help_tools
 
 register_flowchart_tools(mcp)
 register_architecture_tools(mcp)
@@ -44,6 +45,7 @@ register_swot_tools(mcp)
 register_modify_tools(mcp)
 register_export_tools(mcp)
 register_read_tools(mcp)
+register_help_tools(mcp)
 
 def main():
     mcp.run()
