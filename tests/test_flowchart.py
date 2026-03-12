@@ -541,7 +541,7 @@ def test_arrow_bidirectional():
     assert arrow["endArrowhead"] == "arrow"
 
 
-# ========== Iteration 6: Multi-line node labels ==========
+# ========== Iteration 6: Multi-line node labels (done) ==========
 
 def test_multiline_label_height():
     """Multi-line labels should produce taller nodes."""
@@ -573,3 +573,19 @@ def test_multiline_width_uses_longest_line():
     long_width = estimate_text_width("This is a longer line", 20)
     # Shape width should accommodate the longest line
     assert shape["width"] >= long_width
+
+
+# ========== Iteration 14: Node description (subtitle) ==========
+
+def test_flowchart_node_description():
+    """FlowchartNode with description should append it as second line."""
+    from excalidraw_mcp.tools.flowchart import FlowchartNode
+    node = FlowchartNode(label="API Server", description="port 8080")
+    assert node.description == "port 8080"
+
+
+def test_flowchart_node_no_description():
+    """FlowchartNode without description should have None."""
+    from excalidraw_mcp.tools.flowchart import FlowchartNode
+    node = FlowchartNode(label="Step")
+    assert node.description is None

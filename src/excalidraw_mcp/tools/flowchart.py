@@ -8,6 +8,7 @@ class FlowchartNode(BaseModel):
     color: Optional[str] = Field(default=None, description="Color name: blue, green, purple, yellow, red, gray, orange, pink")
     shape: str = Field(default="rectangle", description="Node shape: rectangle (default), diamond (for decisions), ellipse (for start/end)")
     group: Optional[str] = Field(default=None, description="Group name — nodes with same group get a background frame")
+    description: Optional[str] = Field(default=None, description="Secondary text shown below the label (e.g., port, version, notes)")
 
 
 class FlowchartEdge(BaseModel):
@@ -55,8 +56,13 @@ def register_flowchart_tools(mcp: FastMCP):
         node_data = []
         for node in nodes:
             color = get_color(node.color or "blue")
+            # Combine label + description into multi-line text
+            display_label = node.label
+            if node.description:
+                display_label = f"{node.label}\n{node.description}"
             node_data.append({
-                "label": node.label,
+                "label": display_label,
+                "_original_label": node.label,  # for edge matching
                 "color": node.color or "blue",
                 "shape": node.shape,
                 "group": node.group,
@@ -91,6 +97,10 @@ def register_flowchart_tools(mcp: FastMCP):
             all_elements.extend([shape, text])
             shape_map[item["label"]] = shape
             shape_map[str(idx)] = shape
+            # Also index by original label (before description was appended)
+            orig_label = item.get("_original_label")
+            if orig_label and orig_label != item["label"]:
+                shape_map[orig_label] = shape
 
             # Track group membership
             group_name = item.get("group")
