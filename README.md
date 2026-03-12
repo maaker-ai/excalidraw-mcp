@@ -42,6 +42,7 @@ pip install maaker-excalidraw-mcp
 | `create_sequence_diagram` | Create UML-style sequence diagrams with participants, messages, lifelines |
 | `import_mermaid_flowchart` | Import Mermaid flowchart syntax and convert to Excalidraw |
 | `create_mindmap` | Create tree-style mind maps with auto-colored branches |
+| `create_er_diagram` | Create Entity-Relationship diagrams with attributes and cardinality |
 | `modify_diagram` | Add/remove nodes and connections in existing diagrams |
 | `read_diagram` | Analyze existing `.excalidraw` files |
 | `export_diagram` | Export to SVG |
