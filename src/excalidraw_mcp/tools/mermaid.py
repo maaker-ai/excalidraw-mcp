@@ -456,6 +456,45 @@ def parse_mermaid_state(mermaid_text: str) -> tuple[list[dict], list[dict]]:
     return list(state_registry.values()), transitions
 
 
+def parse_mermaid_pie(mermaid_text: str) -> tuple[list[dict], Optional[str]]:
+    """Parse Mermaid pie chart syntax.
+
+    Supported:
+        pie title My Title
+        "Label" : value
+        "Label2" : value2
+
+    Returns:
+        (slices, title) where slices have label and value
+    """
+    lines = mermaid_text.strip().split("\n")
+    slices = []
+    title = None
+
+    for line in lines:
+        stripped = line.strip()
+
+        if not stripped or stripped.startswith("%%"):
+            continue
+
+        # pie title ...
+        m = re.match(r"^pie\s+title\s+(.+)$", stripped)
+        if m:
+            title = m.group(1).strip()
+            continue
+
+        # Just "pie"
+        if stripped == "pie":
+            continue
+
+        # "Label" : value
+        m = re.match(r'^"(.+?)"\s*:\s*([\d.]+)', stripped)
+        if m:
+            slices.append({"label": m.group(1), "value": float(m.group(2))})
+
+    return slices, title
+
+
 def _ensure_state(registry: dict, name: str):
     """Ensure a state exists in the registry."""
     if name not in registry:
@@ -607,7 +646,17 @@ def register_mermaid_tools(mcp: FastMCP):
         """
         first_line = mermaid.strip().split("\n")[0].strip()
 
-        if first_line.lower().startswith("sequencediagram"):
+        if first_line.lower().startswith("pie"):
+            # Pie chart
+            from .pie_chart import create_pie_elements
+
+            slices, pie_title = parse_mermaid_pie(mermaid)
+            elements = create_pie_elements(slices, title=pie_title)
+
+            path = output_path or "/tmp/mermaid-import.excalidraw"
+            result_path = save_excalidraw(elements, path, theme=theme)
+            return f"Mermaid pie chart imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+        elif first_line.lower().startswith("sequencediagram"):
             # Sequence diagram
             from .sequence import create_sequence_elements
 
