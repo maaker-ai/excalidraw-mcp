@@ -1,5 +1,5 @@
 [project]
-name = "excalidraw-mcp"
+name = "maaker-excalidraw-mcp"
 version = "0.1.0"
 description = "Generate beautiful Excalidraw diagrams with auto-layout. Flowcharts, architecture diagrams, and more."
 readme = "README.md"
