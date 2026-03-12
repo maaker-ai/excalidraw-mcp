@@ -8,6 +8,7 @@ from mcp.server.fastmcp import FastMCP
 
 from ..utils.ids import gen_id
 from ..elements.text import create_text, estimate_text_width
+from ..elements.lines import create_line as _shared_create_line
 from ..elements.style import get_color
 from ..utils.file_io import save_excalidraw
 
@@ -18,39 +19,8 @@ DOT_SIZE = 12
 
 
 def _create_line(x1, y1, x2, y2, stroke_color="#868e96", stroke_width=2, stroke_style="solid"):
-    """Create a line element."""
-    lid = gen_id()
-    return {
-        "id": lid,
-        "type": "line",
-        "x": x1, "y": y1,
-        "width": abs(x2 - x1) or 1,
-        "height": abs(y2 - y1) or 1,
-        "strokeColor": stroke_color,
-        "backgroundColor": "transparent",
-        "fillStyle": "solid",
-        "strokeWidth": stroke_width,
-        "strokeStyle": stroke_style,
-        "roughness": 0,
-        "opacity": 100,
-        "angle": 0,
-        "seed": random.randint(1, 2**31),
-        "version": 1,
-        "versionNonce": random.randint(1, 2**31),
-        "isDeleted": False,
-        "groupIds": [],
-        "boundElements": [],
-        "updated": int(time.time() * 1000),
-        "link": None,
-        "locked": False,
-        "roundness": None,
-        "points": [[0, 0], [x2 - x1, y2 - y1]],
-        "lastCommittedPoint": None,
-        "startArrowhead": None,
-        "endArrowhead": None,
-        "startBinding": None,
-        "endBinding": None,
-    }
+    """Create a line element. Delegates to shared utility."""
+    return _shared_create_line(x1, y1, x2, y2, stroke_color=stroke_color, stroke_width=stroke_width, stroke_style=stroke_style)
 
 
 def create_quadrant_elements(
