@@ -21,19 +21,20 @@ def register_flowchart_tools(mcp: FastMCP):
     def create_flowchart(
         nodes: list[FlowchartNode],
         edges: list[FlowchartEdge],
-        direction: str = "horizontal",
+        direction: str = "LR",
         title: Optional[str] = None,
         output_path: Optional[str] = None,
     ) -> str:
-        """Create a flowchart diagram with auto-layout.
+        """Create a flowchart diagram with Sugiyama hierarchical auto-layout.
 
         Generates a hand-drawn style Excalidraw flowchart from nodes and edges.
+        Handles branches, merges, cycles, and disconnected subgraphs.
         Supports Chinese/CJK text with accurate width estimation.
 
         Args:
             nodes: List of nodes with label and optional color
             edges: List of edges connecting nodes (by label or 0-based index)
-            direction: Layout direction - "horizontal" (left to right) or "vertical" (top to bottom)
+            direction: Layout direction - "LR" (left to right), "RL", "TB" (top to bottom), "BT"
             title: Optional diagram title
             output_path: Optional output file path (default: /tmp/flowchart.excalidraw)
 
@@ -43,10 +44,10 @@ def register_flowchart_tools(mcp: FastMCP):
         from excalidraw_mcp.elements.text import create_labeled_shape, estimate_text_width
         from excalidraw_mcp.elements.arrows import create_arrow
         from excalidraw_mcp.elements.style import get_color
-        from excalidraw_mcp.layout.grid import grid_layout
+        from excalidraw_mcp.layout.sugiyama import sugiyama_layout
         from excalidraw_mcp.utils.file_io import save_excalidraw
 
-        # 1. Prepare node data
+        # 1. Prepare node data with colors
         node_data = []
         for node in nodes:
             color = get_color(node.color or "blue")
@@ -57,17 +58,22 @@ def register_flowchart_tools(mcp: FastMCP):
                 "stroke": color["stroke"],
             })
 
-        # 2. Calculate layout
-        laid_out = grid_layout(node_data, direction=direction)
+        # 2. Build edge list for layout engine
+        edge_data = []
+        for edge in edges:
+            edge_data.append({"from": edge.from_node, "to": edge.to_node})
 
-        # 3. Generate elements
+        # 3. Run Sugiyama hierarchical layout
+        laid_out = sugiyama_layout(node_data, edge_data, direction=direction)
+
+        # 4. Generate elements
         all_elements = []
-        shape_map = {}  # label -> shape element
+        shape_map = {}
 
         for idx, item in enumerate(laid_out):
             shape, text = create_labeled_shape(
                 "rectangle",
-                id=None,  # auto generate
+                id=None,
                 label=item["label"],
                 x=item["x"], y=item["y"],
                 width=item["width"], height=item["height"],
@@ -78,27 +84,26 @@ def register_flowchart_tools(mcp: FastMCP):
             shape_map[item["label"]] = shape
             shape_map[str(idx)] = shape
 
-        # 4. Generate arrows
+        # 5. Generate arrows
         for edge in edges:
-            from_key = edge.from_node
-            to_key = edge.to_node
-            start_el = shape_map.get(from_key)
-            end_el = shape_map.get(to_key)
+            start_el = shape_map.get(edge.from_node)
+            end_el = shape_map.get(edge.to_node)
             if start_el and end_el:
                 arrow = create_arrow(None, start_el, end_el)
                 all_elements.append(arrow)
 
-        # 5. Add title if provided
+        # 6. Add title if provided
         if title:
-            from excalidraw_mcp.elements.text import create_text, _gen_id
+            from excalidraw_mcp.elements.text import create_text
+            from excalidraw_mcp.utils.ids import gen_id
             title_width = estimate_text_width(title, 28)
             title_text = create_text(
-                _gen_id(), title, x=0, y=-50,
+                gen_id(), title, x=0, y=-50,
                 font_size=28, width=title_width,
             )
             all_elements.insert(0, title_text)
 
-        # 6. Save
+        # 7. Save
         path = output_path or "/tmp/flowchart.excalidraw"
         result_path = save_excalidraw(all_elements, path)
         return f"Flowchart saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
