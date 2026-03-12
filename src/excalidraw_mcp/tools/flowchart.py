@@ -7,6 +7,7 @@ class FlowchartNode(BaseModel):
     label: str = Field(description="Node label text")
     color: Optional[str] = Field(default=None, description="Color name: blue, green, purple, yellow, red, gray, orange, pink")
     shape: str = Field(default="rectangle", description="Node shape: rectangle (default), diamond (for decisions), ellipse (for start/end)")
+    group: Optional[str] = Field(default=None, description="Group name — nodes with same group get a background frame")
 
 
 class FlowchartEdge(BaseModel):
@@ -49,7 +50,7 @@ def register_flowchart_tools(mcp: FastMCP):
         from excalidraw_mcp.layout.sugiyama import sugiyama_layout
         from excalidraw_mcp.utils.file_io import save_excalidraw
 
-        # 1. Prepare node data with colors and shapes
+        # 1. Prepare node data with colors, shapes, and groups
         node_data = []
         for node in nodes:
             color = get_color(node.color or "blue")
@@ -57,6 +58,7 @@ def register_flowchart_tools(mcp: FastMCP):
                 "label": node.label,
                 "color": node.color or "blue",
                 "shape": node.shape,
+                "group": node.group,
                 "bg": color["bg"],
                 "stroke": color["stroke"],
             })
@@ -72,6 +74,7 @@ def register_flowchart_tools(mcp: FastMCP):
         # 4. Generate elements
         all_elements = []
         shape_map = {}
+        group_bounds: dict[str, list] = {}
 
         for idx, item in enumerate(laid_out):
             shape_type = item.get("shape", "rectangle")
@@ -87,6 +90,21 @@ def register_flowchart_tools(mcp: FastMCP):
             all_elements.extend([shape, text])
             shape_map[item["label"]] = shape
             shape_map[str(idx)] = shape
+
+            # Track group membership
+            group_name = item.get("group")
+            if group_name:
+                group_bounds.setdefault(group_name, []).append(
+                    {"x": item["x"], "y": item["y"], "width": item["width"], "height": item["height"]}
+                )
+
+        # 4b. Add group frames (at beginning so they render behind nodes)
+        if group_bounds:
+            from excalidraw_mcp.elements.groups import create_group_frame
+            frame_elements = []
+            for group_name, bounds in group_bounds.items():
+                frame_elements.extend(create_group_frame(group_name, bounds))
+            all_elements = frame_elements + all_elements
 
         # 5. Generate arrows
         for edge in edges:

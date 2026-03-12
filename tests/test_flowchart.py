@@ -408,3 +408,111 @@ def test_arrow_dotted_style():
     result = create_arrow("arr1", shape1, shape2, strokeStyle="dotted")
     arrow = result[0]
     assert arrow["strokeStyle"] == "dotted"
+
+
+# ========== Iteration 4: Node grouping with frames ==========
+
+def test_flowchart_node_group_field():
+    """FlowchartNode should accept an optional group field."""
+    from excalidraw_mcp.tools.flowchart import FlowchartNode
+    node = FlowchartNode(label="API", group="Backend")
+    assert node.group == "Backend"
+
+    node_default = FlowchartNode(label="Step")
+    assert node_default.group is None
+
+
+def test_create_group_frame():
+    """create_group_frame should produce a background rectangle with label."""
+    from excalidraw_mcp.elements.groups import create_group_frame
+
+    # Simulate some node positions
+    node_bounds = [
+        {"x": 0, "y": 0, "width": 200, "height": 70},
+        {"x": 300, "y": 0, "width": 200, "height": 70},
+    ]
+    frame_elements = create_group_frame("Backend", node_bounds, color="blue")
+    assert len(frame_elements) == 2  # frame rect + label text
+    frame_rect = frame_elements[0]
+    frame_label = frame_elements[1]
+
+    assert frame_rect["type"] == "rectangle"
+    # Frame should encompass all nodes with padding
+    assert frame_rect["x"] < 0  # padding before first node
+    assert frame_rect["width"] > 500  # wider than nodes span
+    assert frame_label["type"] == "text"
+    assert frame_label["text"] == "Backend"
+
+
+def test_flowchart_with_groups_e2e():
+    """End-to-end: flowchart with groups should have frame rectangles."""
+    import tempfile
+    from excalidraw_mcp.elements.text import create_labeled_shape
+    from excalidraw_mcp.elements.arrows import create_arrow
+    from excalidraw_mcp.elements.style import get_color
+    from excalidraw_mcp.elements.groups import create_group_frame
+    from excalidraw_mcp.layout.sugiyama import sugiyama_layout
+    from excalidraw_mcp.utils.file_io import save_excalidraw, load_excalidraw
+
+    nodes = [
+        {"label": "React", "color": "blue", "group": "Frontend"},
+        {"label": "Next.js", "color": "blue", "group": "Frontend"},
+        {"label": "API", "color": "green", "group": "Backend"},
+        {"label": "DB", "color": "purple", "group": "Backend"},
+    ]
+    edge_data = [
+        {"from": "React", "to": "API"},
+        {"from": "Next.js", "to": "API"},
+        {"from": "API", "to": "DB"},
+    ]
+
+    laid_out = sugiyama_layout(nodes, edge_data, direction="LR")
+    all_elements = []
+    shape_map = {}
+    group_bounds: dict[str, list] = {}
+
+    for idx, item in enumerate(laid_out):
+        color = get_color(nodes[idx]["color"])
+        shape, text = create_labeled_shape(
+            "rectangle", id=None, label=item["label"],
+            x=item["x"], y=item["y"],
+            width=item["width"], height=item["height"],
+            background_color=color["bg"], stroke_color=color["stroke"],
+        )
+        all_elements.extend([shape, text])
+        shape_map[item["label"]] = shape
+
+        group_name = nodes[idx].get("group")
+        if group_name:
+            group_bounds.setdefault(group_name, []).append(
+                {"x": item["x"], "y": item["y"], "width": item["width"], "height": item["height"]}
+            )
+
+    # Add group frames (at the beginning so they render behind nodes)
+    for group_name, bounds in group_bounds.items():
+        frame_elements = create_group_frame(group_name, bounds)
+        all_elements = frame_elements + all_elements
+
+    for edge in edge_data:
+        result = create_arrow(None, shape_map[edge["from"]], shape_map[edge["to"]])
+        all_elements.extend(result)
+
+    with tempfile.NamedTemporaryFile(suffix=".excalidraw", delete=False) as f:
+        path = f.name
+
+    try:
+        save_excalidraw(all_elements, path)
+        data = load_excalidraw(path)
+        elements = data["elements"]
+
+        # Should have 4 node rects + 2 frame rects = 6 rectangles
+        rects = [e for e in elements if e["type"] == "rectangle"]
+        assert len(rects) == 6, f"Expected 6 rectangles (4 nodes + 2 frames), got {len(rects)}"
+
+        # Should have group label texts
+        texts = [e for e in elements if e["type"] == "text"]
+        text_values = [t["text"] for t in texts]
+        assert "Frontend" in text_values
+        assert "Backend" in text_values
+    finally:
+        os.unlink(path)
