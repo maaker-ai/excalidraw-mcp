@@ -47,11 +47,23 @@ def register_read_tools(mcp):
         for s in shapes:
             id_to_label[s["id"]] = texts.get(s["id"], s["id"])
 
+        # Also track arrow labels (text elements bound to arrows)
+        arrow_labels = {}
+        for el in elements:
+            if el["type"] == "text" and el.get("containerId"):
+                cid = el["containerId"]
+                if any(a["id"] == cid for a in arrows):
+                    arrow_labels[cid] = el["text"]
+
         for a in arrows:
             start_id = a.get("startBinding", {}).get("elementId", "?")
             end_id = a.get("endBinding", {}).get("elementId", "?")
             start_label = id_to_label.get(start_id, start_id)
             end_label = id_to_label.get(end_id, end_id)
-            lines.append(f"- {start_label} → {end_label}")
+            arrow_label = arrow_labels.get(a["id"], "")
+            style = a.get("strokeStyle", "solid")
+            style_info = f" [{style}]" if style != "solid" else ""
+            label_info = f" \"{arrow_label}\"" if arrow_label else ""
+            lines.append(f"- {start_label} →{label_info} {end_label}{style_info}")
 
         return "\n".join(lines)

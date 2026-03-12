@@ -69,12 +69,16 @@ def register_modify_tools(mcp):
 
         elements = [el for el in elements if el["id"] not in remove_ids]
 
-        # Add nodes
+        # Add nodes (support shape, color, description)
         for node in add_nodes:
             color = get_color(node.get("color", "blue"))
+            shape_type = node.get("shape", "rectangle")
+            label = node["label"]
+            if node.get("description"):
+                label = f"{label}\n{node['description']}"
             shape, text = create_labeled_shape(
-                "rectangle", id=None,
-                label=node["label"],
+                shape_type, id=None,
+                label=label,
                 x=node.get("x", 100), y=node.get("y", 100),
                 background_color=color["bg"],
                 stroke_color=color["stroke"],
@@ -82,12 +86,16 @@ def register_modify_tools(mcp):
             elements.extend([shape, text])
             shape_map[node["label"]] = shape
 
-        # Add connections
+        # Add connections (support label and style)
         for conn in add_connections:
             start = shape_map.get(conn.get("from"))
             end = shape_map.get(conn.get("to"))
             if start and end:
-                result = create_arrow(None, start, end)
+                result = create_arrow(
+                    None, start, end,
+                    label=conn.get("label"),
+                    strokeStyle=conn.get("style", "solid"),
+                )
                 elements.extend(result)
 
         path = output_path or file_path
