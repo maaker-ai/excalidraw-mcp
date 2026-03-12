@@ -56,11 +56,13 @@ from ..utils.ids import gen_id as _gen_id
 
 
 def create_arrow(id: str, start_element: dict, end_element: dict,
-                 start_side: str = "auto", end_side: str = "auto", **kwargs) -> dict:
+                 start_side: str = "auto", end_side: str = "auto",
+                 label: Optional[str] = None, **kwargs) -> list:
     """创建箭头元素，连接两个形状。
 
     start_element, end_element: 形状 dict（需要 id, x, y, width, height）
     start_side, end_side: "left"|"right"|"top"|"bottom"|"auto"
+    label: 可选的边标签文字
 
     auto 模式根据两个形状的相对位置判断连接边。
 
@@ -69,6 +71,10 @@ def create_arrow(id: str, start_element: dict, end_element: dict,
     - arrow.x, arrow.y = 起点在框边缘的全局坐标
     - points = [[0,0], [dx, dy]] 相对偏移
     - 不使用废弃的 focus/gap 格式
+
+    返回值：list[dict]
+    - 无标签: [arrow]
+    - 有标签: [arrow, text]
     """
     if id is None:
         id = "arrow_" + _gen_id()
@@ -136,6 +142,29 @@ def create_arrow(id: str, start_element: dict, end_element: dict,
         "elbowed": kwargs.get("elbowed", False),
     }
 
+    # 如果有标签，创建绑定文字元素
+    if label:
+        from .text import create_text, estimate_text_width
+        text_id = id + "_label"
+        font_size = 16
+        text_width = estimate_text_width(label, font_size)
+        text_height = font_size * 1.4
+
+        # 文字位于箭头中点
+        mid_x = arrow_x + rel_dx / 2
+        mid_y = arrow_y + rel_dy / 2
+        text_x = mid_x - text_width / 2
+        text_y = mid_y - text_height / 2
+
+        text_elem = create_text(
+            text_id, label, text_x, text_y,
+            font_size=font_size,
+            container_id=id,
+            width=text_width,
+            height=text_height,
+        )
+        arrow["boundElements"].append({"id": text_id, "type": "text"})
+
     # 更新 start_element 和 end_element 的 boundElements
     arrow_ref = {"id": id, "type": "arrow"}
     if arrow_ref not in start_element.get("boundElements", []):
@@ -143,4 +172,6 @@ def create_arrow(id: str, start_element: dict, end_element: dict,
     if arrow_ref not in end_element.get("boundElements", []):
         end_element.setdefault("boundElements", []).append(arrow_ref)
 
-    return arrow
+    if label:
+        return [arrow, text_elem]
+    return [arrow]

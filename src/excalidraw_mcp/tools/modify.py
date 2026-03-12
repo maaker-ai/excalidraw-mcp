@@ -87,8 +87,8 @@ def register_modify_tools(mcp):
             start = shape_map.get(conn.get("from"))
             end = shape_map.get(conn.get("to"))
             if start and end:
-                arrow = create_arrow(None, start, end)
-                elements.append(arrow)
+                result = create_arrow(None, start, end)
+                elements.extend(result)
 
         path = output_path or file_path
         result = save_excalidraw(elements, path)

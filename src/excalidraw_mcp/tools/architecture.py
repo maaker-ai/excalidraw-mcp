@@ -64,8 +64,8 @@ def register_architecture_tools(mcp):
             start = shape_map.get(conn.get("from"))
             end = shape_map.get(conn.get("to"))
             if start and end:
-                arrow = create_arrow(None, start, end)
-                all_elements.append(arrow)
+                result = create_arrow(None, start, end)
+                all_elements.extend(result)
 
         path = output_path or "/tmp/architecture.excalidraw"
         result_path = save_excalidraw(all_elements, path)

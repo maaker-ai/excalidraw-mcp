@@ -89,8 +89,8 @@ def register_flowchart_tools(mcp: FastMCP):
             start_el = shape_map.get(edge.from_node)
             end_el = shape_map.get(edge.to_node)
             if start_el and end_el:
-                arrow = create_arrow(None, start_el, end_el)
-                all_elements.append(arrow)
+                result = create_arrow(None, start_el, end_el, label=edge.label)
+                all_elements.extend(result)
 
         # 6. Add title if provided
         if title:

@@ -62,7 +62,8 @@ def test_arrow_fixedpoint_orbit():
     shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
     shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=300, y=0, width=200, height=70)
 
-    arrow = create_arrow("arr1", shape1, shape2)
+    result = create_arrow("arr1", shape1, shape2)
+    arrow = result[0]
 
     assert arrow["startBinding"]["mode"] == "orbit"
     assert arrow["endBinding"]["mode"] == "orbit"
@@ -74,7 +75,8 @@ def test_arrow_auto_id():
     shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
     shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=300, y=0, width=200, height=70)
 
-    arrow = create_arrow(None, shape1, shape2)
+    result = create_arrow(None, shape1, shape2)
+    arrow = result[0]
     assert arrow["id"] is not None
     assert arrow["id"].startswith("arrow_")
 
@@ -83,7 +85,8 @@ def test_arrow_coordinates():
     shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
     shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=300, y=0, width=200, height=70)
 
-    arrow = create_arrow("arr1", shape1, shape2)
+    result = create_arrow("arr1", shape1, shape2)
+    arrow = result[0]
 
     # Arrow starts at right edge of shape1
     assert arrow["x"] == 200  # shape1.x + shape1.width
@@ -97,7 +100,8 @@ def test_arrow_vertical():
     shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
     shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=0, y=200, width=200, height=70)
 
-    arrow = create_arrow("arr1", shape1, shape2)
+    result = create_arrow("arr1", shape1, shape2)
+    arrow = result[0]
     assert arrow["startBinding"]["fixedPoint"] == [0.5001, 1.0]  # bottom
     assert arrow["endBinding"]["fixedPoint"] == [0.5001, 0.0]    # top
 
@@ -179,8 +183,8 @@ def test_full_flowchart():
 
     # Add arrows
     for f, t in [("用户请求", "负载均衡"), ("负载均衡", "API Server")]:
-        arrow = create_arrow(None, shape_map[f], shape_map[t])
-        all_elements.append(arrow)
+        result = create_arrow(None, shape_map[f], shape_map[t])
+        all_elements.extend(result)
 
     with tempfile.NamedTemporaryFile(suffix=".excalidraw", delete=False) as f:
         path = f.name
@@ -212,3 +216,50 @@ def test_full_flowchart():
             assert "fixedPoint" in arrow_el["endBinding"]
     finally:
         os.unlink(path)
+
+
+def test_arrow_with_label():
+    """Arrow with label should return arrow + text element."""
+    shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
+    shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=300, y=0, width=200, height=70)
+
+    result = create_arrow("arr1", shape1, shape2, label="Yes")
+    # Should return a list: [arrow, text]
+    assert isinstance(result, list)
+    assert len(result) == 2
+    arrow, text = result
+    assert arrow["type"] == "arrow"
+    assert text["type"] == "text"
+    assert text["text"] == "Yes"
+    assert text["containerId"] == "arr1"
+    assert {"id": text["id"], "type": "text"} in arrow["boundElements"]
+
+
+def test_arrow_without_label():
+    """Arrow without label should return a single-element list for consistency."""
+    shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
+    shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=300, y=0, width=200, height=70)
+
+    result = create_arrow("arr1", shape1, shape2)
+    # Without label, should return list with just the arrow
+    assert isinstance(result, list)
+    assert len(result) == 1
+    assert result[0]["type"] == "arrow"
+
+
+def test_arrow_label_position():
+    """Arrow label should be positioned at the midpoint of the arrow."""
+    shape1, _ = create_labeled_shape("rectangle", id="a", label="A", x=0, y=0, width=200, height=70)
+    shape2, _ = create_labeled_shape("rectangle", id="b", label="B", x=400, y=0, width=200, height=70)
+
+    result = create_arrow("arr1", shape1, shape2, label="条件")
+    arrow, text = result
+
+    # Text midpoint should be roughly at arrow midpoint
+    arrow_mid_x = arrow["x"] + arrow["points"][1][0] / 2
+    arrow_mid_y = arrow["y"] + arrow["points"][1][1] / 2
+    text_mid_x = text["x"] + text["width"] / 2
+    text_mid_y = text["y"] + text["height"] / 2
+
+    assert abs(text_mid_x - arrow_mid_x) < 5
+    assert abs(text_mid_y - arrow_mid_y) < 5
