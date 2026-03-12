@@ -1,6 +1,6 @@
 # excalidraw-mcp
 
-Generate beautiful hand-drawn diagrams with AI. Flowcharts, architecture diagrams, and more — with **Sugiyama hierarchical layout**, **CJK support**, and **zero learning curve**.
+Generate 20+ types of beautiful hand-drawn diagrams with AI — flowcharts, sequence, architecture, mind maps, ER, class, state, timeline, pie charts, kanban, wireframes, and more — with **Sugiyama hierarchical layout**, **CJK support**, and **zero learning curve**.
 
 > By [Maaker.AI](https://maaker.ai)
 
@@ -37,15 +37,27 @@ pip install maaker-excalidraw-mcp
 
 | Tool | Description |
 |------|-------------|
-| `create_flowchart` | Create flowcharts with Sugiyama hierarchical layout — handles branches, merges, cycles |
-| `create_architecture_diagram` | Create layered architecture diagrams |
-| `create_sequence_diagram` | Create UML-style sequence diagrams with participants, messages, lifelines |
-| `import_mermaid_flowchart` | Import Mermaid flowchart syntax and convert to Excalidraw |
-| `create_mindmap` | Create tree-style mind maps with auto-colored branches |
-| `create_er_diagram` | Create Entity-Relationship diagrams with attributes and cardinality |
+| `create_flowchart` | Flowcharts with Sugiyama layout — branches, merges, cycles, groups |
+| `create_architecture_diagram` | Layered architecture diagrams with connections |
+| `create_sequence_diagram` | UML sequence diagrams with lifelines and messages |
+| `create_class_diagram` | UML class diagrams with attributes, methods, relationships |
+| `create_state_diagram` | UML state machines with initial/final states |
+| `create_er_diagram` | Entity-Relationship diagrams with cardinality |
+| `create_mindmap` | Tree-style mind maps with auto-colored branches |
+| `create_timeline` | Timeline/Gantt charts with overlapping event handling |
+| `create_pie_chart` | Pie charts with labeled slices and percentages |
+| `create_kanban_board` | Kanban boards with columns and cards |
+| `create_network_diagram` | Network topology with typed nodes (server, DB, etc.) |
+| `create_quadrant_chart` | 2x2 priority/positioning matrices |
+| `create_user_journey` | User journey maps with emotion indicators |
+| `create_wireframe` | UI wireframe mockups with device frames |
+| `create_org_chart` | Organizational charts (top-down hierarchy) |
+| `create_swot_analysis` | SWOT analysis 2x2 color-coded matrices |
+| `import_mermaid` | Import Mermaid syntax (flowchart, sequence, class) |
+| `list_diagram_types` | List all available diagram types |
 | `modify_diagram` | Add/remove nodes and connections in existing diagrams |
 | `read_diagram` | Analyze existing `.excalidraw` files |
-| `export_diagram` | Export to SVG |
+| `export_to_svg` | Export diagrams to SVG format |
 
 ## Quick Examples
 
