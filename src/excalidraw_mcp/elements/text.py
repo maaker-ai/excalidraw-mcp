@@ -34,8 +34,16 @@ def estimate_text_width(text: str, font_size: int = 20) -> float:
     return total
 
 
+FONT_FAMILIES = {
+    "hand-drawn": 1, "hand_drawn": 1, "excalifont": 1,
+    "normal": 2, "sans-serif": 2, "sans_serif": 2, "helvetica": 2,
+    "code": 3, "monospace": 3, "mono": 3, "cascadia": 3,
+}
+
+
 def create_text(id: str, text: str, x: float, y: float,
-                font_size: int = 20, container_id: Optional[str] = None, **kwargs) -> dict:
+                font_size: int = 20, container_id: Optional[str] = None,
+                font_family: Optional[str] = None, **kwargs) -> dict:
     """创建文字元素。
 
     如果有 container_id，设置 containerId、textAlign="center"、verticalAlign="middle"、autoResize=true
@@ -70,7 +78,7 @@ def create_text(id: str, text: str, x: float, y: float,
         "roundness": None,
         "text": text,
         "fontSize": font_size,
-        "fontFamily": kwargs.pop("fontFamily", 1),
+        "fontFamily": kwargs.pop("fontFamily", FONT_FAMILIES.get(font_family or "", 1)),
         "textAlign": kwargs.pop("textAlign", "center" if container_id else "left"),
         "verticalAlign": kwargs.pop("verticalAlign", "middle" if container_id else "top"),
         "baseline": kwargs.pop("baseline", int(font_size * 0.8)),
