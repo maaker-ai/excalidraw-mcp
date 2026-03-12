@@ -27,6 +27,7 @@ from excalidraw_mcp.tools.help import register_help_tools
 from excalidraw_mcp.tools.table import register_table_tools
 from excalidraw_mcp.tools.radar import register_radar_tools
 from excalidraw_mcp.tools.bar_chart import register_bar_chart_tools
+from excalidraw_mcp.tools.line_chart import register_line_chart_tools
 from excalidraw_mcp.tools.unified import register_unified_tools
 
 register_flowchart_tools(mcp)
@@ -52,6 +53,7 @@ register_read_tools(mcp)
 register_table_tools(mcp)
 register_radar_tools(mcp)
 register_bar_chart_tools(mcp)
+register_line_chart_tools(mcp)
 register_help_tools(mcp)
 register_unified_tools(mcp)
 
