@@ -179,6 +179,7 @@ def register_er_tools(mcp: FastMCP):
         relationships: list[ERRelationship] | None = None,
         title: Optional[str] = None,
         output_path: Optional[str] = None,
+        theme: str = "light",
     ) -> str:
         """Create an Entity-Relationship (ER) diagram.
 
@@ -213,5 +214,5 @@ def register_er_tools(mcp: FastMCP):
         elements = create_er_elements(ent_dicts, rel_dicts, title=title)
 
         path = output_path or "/tmp/er-diagram.excalidraw"
-        result_path = save_excalidraw(elements, path)
+        result_path = save_excalidraw(elements, path, theme=theme)
         return f"ER diagram saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"

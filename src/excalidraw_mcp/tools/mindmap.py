@@ -178,6 +178,7 @@ def register_mindmap_tools(mcp: FastMCP):
         root: MindmapNode,
         title: Optional[str] = None,
         output_path: Optional[str] = None,
+        theme: str = "light",
     ) -> str:
         """Create a mind map diagram from a tree structure.
 
@@ -203,5 +204,5 @@ def register_mindmap_tools(mcp: FastMCP):
         elements = create_mindmap_elements(root_dict, title=title)
 
         path = output_path or "/tmp/mindmap.excalidraw"
-        result_path = save_excalidraw(elements, path)
+        result_path = save_excalidraw(elements, path, theme=theme)
         return f"Mind map saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"

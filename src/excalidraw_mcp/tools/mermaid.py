@@ -271,6 +271,7 @@ def register_mermaid_tools(mcp: FastMCP):
     def import_mermaid_flowchart(
         mermaid: str,
         output_path: Optional[str] = None,
+        theme: str = "light",
     ) -> str:
         """Import a Mermaid flowchart and convert to Excalidraw.
 
@@ -381,13 +382,14 @@ def register_mermaid_tools(mcp: FastMCP):
                 all_elements.extend(result)
 
         path = output_path or "/tmp/mermaid-import.excalidraw"
-        result_path = save_excalidraw(all_elements, path)
+        result_path = save_excalidraw(all_elements, path, theme=theme)
         return f"Mermaid flowchart imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
 
     @mcp.tool()
     def import_mermaid(
         mermaid: str,
         output_path: Optional[str] = None,
+        theme: str = "light",
     ) -> str:
         """Import any Mermaid diagram and convert to Excalidraw.
 
@@ -411,8 +413,8 @@ def register_mermaid_tools(mcp: FastMCP):
             elements = create_sequence_elements(participants, messages)
 
             path = output_path or "/tmp/mermaid-import.excalidraw"
-            result_path = save_excalidraw(elements, path)
+            result_path = save_excalidraw(elements, path, theme=theme)
             return f"Mermaid sequence diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
         else:
             # Flowchart (default)
-            return import_mermaid_flowchart(mermaid=mermaid, output_path=output_path)
+            return import_mermaid_flowchart(mermaid=mermaid, output_path=output_path, theme=theme)
