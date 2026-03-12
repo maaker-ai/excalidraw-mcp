@@ -193,6 +193,51 @@ def route_diagram(
         result_path = save_excalidraw(elements, path, theme=theme)
         return f"Org chart saved to: {result_path}"
 
+    elif dtype == "table":
+        from .table import create_table_elements
+        headers = data.get("headers", [])
+        rows = data.get("rows", [])
+        elements = create_table_elements(headers, rows, title=title)
+        path = output_path or "/tmp/table.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Table saved to: {result_path}"
+
+    elif dtype in ("radar", "radar_chart"):
+        from .radar import create_radar_elements
+        axes = data.get("axes", [])
+        values = data.get("values")
+        series = data.get("series")
+        elements = create_radar_elements(axes, values=values, series=series, title=title)
+        path = output_path or "/tmp/radar.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Radar chart saved to: {result_path}"
+
+    elif dtype in ("bar", "bar_chart"):
+        from .bar_chart import create_bar_elements
+        bars = data.get("bars", [])
+        elements = create_bar_elements(bars, title=title)
+        path = output_path or "/tmp/bar-chart.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Bar chart saved to: {result_path}"
+
+    elif dtype in ("line", "line_chart"):
+        from .line_chart import create_line_chart_elements
+        series = data.get("series", [])
+        x_labels = data.get("x_labels", [])
+        elements = create_line_chart_elements(series, x_labels, title=title)
+        path = output_path or "/tmp/line-chart.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Line chart saved to: {result_path}"
+
+    elif dtype in ("decision", "decision_tree"):
+        from .decision_tree import create_decision_tree_elements
+        nodes = data.get("nodes", [])
+        edges = data.get("edges", [])
+        elements = create_decision_tree_elements(nodes, edges, title=title)
+        path = output_path or "/tmp/decision-tree.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Decision tree saved to: {result_path}"
+
     elif dtype == "swot":
         from .swot import create_swot_elements
         elements = create_swot_elements(data, title=title)
