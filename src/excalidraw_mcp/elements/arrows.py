@@ -97,6 +97,21 @@ def create_arrow(id: str, start_element: dict, end_element: dict,
     rel_dx = end_x - start_x
     rel_dy = end_y - start_y
 
+    # Elbow routing: compute right-angle path
+    is_elbowed = kwargs.get("elbowed", False)
+    if is_elbowed and abs(rel_dx) > 1 and abs(rel_dy) > 1:
+        # Route with a midpoint for right-angle turn
+        if start_side in ("right", "left"):
+            # Go horizontal first, then vertical
+            mid_x = rel_dx / 2
+            points = [[0, 0], [mid_x, 0], [mid_x, rel_dy], [rel_dx, rel_dy]]
+        else:
+            # Go vertical first, then horizontal
+            mid_y = rel_dy / 2
+            points = [[0, 0], [0, mid_y], [rel_dx, mid_y], [rel_dx, rel_dy]]
+    else:
+        points = [[0, 0], [rel_dx, rel_dy]]
+
     start_fixed = _FIXED_POINTS[start_side]
     end_fixed = _FIXED_POINTS[end_side]
 
@@ -125,7 +140,7 @@ def create_arrow(id: str, start_element: dict, end_element: dict,
         "link": None,
         "locked": False,
         "roundness": {"type": 2},
-        "points": [[0, 0], [rel_dx, rel_dy]],
+        "points": points,
         "lastCommittedPoint": None,
         "startArrowhead": kwargs.get("startArrowhead", None),
         "endArrowhead": kwargs.get("endArrowhead", "arrow"),
