@@ -1,6 +1,6 @@
 [project]
 name = "maaker-excalidraw-mcp"
-version = "0.2.0"
+version = "0.3.0"
 description = "Generate beautiful Excalidraw diagrams with auto-layout. Flowcharts, architecture diagrams, and more."
 readme = "README.md"
 license = {text = "MIT"}
