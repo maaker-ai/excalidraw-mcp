@@ -266,6 +266,141 @@ def parse_mermaid_sequence(mermaid_text: str) -> tuple[list[str], list[dict]]:
     return participants_ordered, messages
 
 
+def parse_mermaid_class(mermaid_text: str) -> tuple[list[dict], list[dict]]:
+    """Parse Mermaid class diagram syntax.
+
+    Supported:
+        classDiagram
+        class ClassName {
+            +String attr
+            -int id
+            +method()
+            -privateMethod()
+        }
+        Animal <|-- Dog         (inheritance)
+        Customer --> Order      (association)
+        Order *-- LineItem      (composition)
+        Order o-- Product       (aggregation)
+        A -- B : label          (with label)
+
+    Returns:
+        (classes, relationships) where classes have name, attributes, methods
+    """
+    lines = mermaid_text.strip().split("\n")
+
+    class_registry: dict[str, dict] = {}
+    relationships: list[dict] = []
+    current_class: Optional[str] = None
+    in_class_body = False
+
+    for line in lines:
+        stripped = line.strip()
+
+        if not stripped or stripped == "classDiagram" or stripped.startswith("%%"):
+            continue
+
+        # Class body end
+        if stripped == "}":
+            current_class = None
+            in_class_body = False
+            continue
+
+        # Class definition start: class Name {
+        m = re.match(r"class\s+(\w+)\s*\{?\s*$", stripped)
+        if m:
+            class_name = m.group(1)
+            if class_name not in class_registry:
+                class_registry[class_name] = {"name": class_name, "attributes": [], "methods": []}
+            if "{" in stripped:
+                current_class = class_name
+                in_class_body = True
+            continue
+
+        # Inside class body — attributes and methods
+        if in_class_body and current_class:
+            # Method has ()
+            if "(" in stripped and ")" in stripped:
+                class_registry[current_class]["methods"].append(stripped)
+            else:
+                class_registry[current_class]["attributes"].append(stripped)
+            continue
+
+        # Relationship patterns
+        # A <|-- B (inheritance: B inherits A)
+        m = re.match(r'(\w+)\s+<\|--\s+(\w+)(?:\s*:\s*(.+))?', stripped)
+        if m:
+            _ensure_class(class_registry, m.group(1))
+            _ensure_class(class_registry, m.group(2))
+            relationships.append({
+                "from": m.group(2), "to": m.group(1),
+                "type": "inheritance", "label": (m.group(3) or "").strip(),
+            })
+            continue
+
+        # A *-- B (composition)
+        m = re.match(r'(\w+)\s+\*--\s+(\w+)(?:\s*:\s*(.+))?', stripped)
+        if m:
+            _ensure_class(class_registry, m.group(1))
+            _ensure_class(class_registry, m.group(2))
+            relationships.append({
+                "from": m.group(1), "to": m.group(2),
+                "type": "composition", "label": (m.group(3) or "").strip(),
+            })
+            continue
+
+        # A o-- B (aggregation)
+        m = re.match(r'(\w+)\s+o--\s+(\w+)(?:\s*:\s*(.+))?', stripped)
+        if m:
+            _ensure_class(class_registry, m.group(1))
+            _ensure_class(class_registry, m.group(2))
+            relationships.append({
+                "from": m.group(1), "to": m.group(2),
+                "type": "aggregation", "label": (m.group(3) or "").strip(),
+            })
+            continue
+
+        # A "card1" --> "card2" B : label (with cardinality)
+        m = re.match(r'(\w+)\s+"[^"]*"\s*-->\s*"[^"]*"\s*(\w+)(?:\s*:\s*(.+))?', stripped)
+        if m:
+            _ensure_class(class_registry, m.group(1))
+            _ensure_class(class_registry, m.group(2))
+            relationships.append({
+                "from": m.group(1), "to": m.group(2),
+                "type": "association", "label": (m.group(3) or "").strip(),
+            })
+            continue
+
+        # A --> B (association)
+        m = re.match(r'(\w+)\s+-->\s+(\w+)(?:\s*:\s*(.+))?', stripped)
+        if m:
+            _ensure_class(class_registry, m.group(1))
+            _ensure_class(class_registry, m.group(2))
+            relationships.append({
+                "from": m.group(1), "to": m.group(2),
+                "type": "association", "label": (m.group(3) or "").strip(),
+            })
+            continue
+
+        # A -- B (plain link)
+        m = re.match(r'(\w+)\s+--\s+(\w+)(?:\s*:\s*(.+))?', stripped)
+        if m:
+            _ensure_class(class_registry, m.group(1))
+            _ensure_class(class_registry, m.group(2))
+            relationships.append({
+                "from": m.group(1), "to": m.group(2),
+                "type": "association", "label": (m.group(3) or "").strip(),
+            })
+            continue
+
+    return list(class_registry.values()), relationships
+
+
+def _ensure_class(registry: dict, name: str):
+    """Ensure a class exists in the registry."""
+    if name not in registry:
+        registry[name] = {"name": name, "attributes": [], "methods": []}
+
+
 def register_mermaid_tools(mcp: FastMCP):
     @mcp.tool()
     def import_mermaid_flowchart(
@@ -415,6 +550,16 @@ def register_mermaid_tools(mcp: FastMCP):
             path = output_path or "/tmp/mermaid-import.excalidraw"
             result_path = save_excalidraw(elements, path, theme=theme)
             return f"Mermaid sequence diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+        elif first_line.lower().startswith("classdiagram"):
+            # Class diagram
+            from .class_diagram import create_class_elements
+
+            classes, rels = parse_mermaid_class(mermaid)
+            elements = create_class_elements(classes, rels)
+
+            path = output_path or "/tmp/mermaid-import.excalidraw"
+            result_path = save_excalidraw(elements, path, theme=theme)
+            return f"Mermaid class diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
         else:
             # Flowchart (default)
             return import_mermaid_flowchart(mermaid=mermaid, output_path=output_path, theme=theme)
