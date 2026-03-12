@@ -7,6 +7,7 @@ from mcp.server.fastmcp import FastMCP
 from ..utils.ids import gen_id
 from ..elements.text import create_text, estimate_text_width
 from ..elements.lines import create_line
+from ..elements.shapes import create_ellipse, create_rectangle
 from ..elements.style import get_color
 from ..utils.file_io import save_excalidraw
 
@@ -92,6 +93,43 @@ def create_line_chart_elements(
             x2, y2 = coords[i + 1]
             seg = create_line(x1, y1, x2, y2, stroke_color=color["stroke"], stroke_width=2)
             elements.append(seg)
+
+        # Draw data point markers
+        MARKER_SIZE = 8
+        for px, py in coords:
+            marker = create_ellipse(
+                gen_id(),
+                px - MARKER_SIZE / 2, py - MARKER_SIZE / 2,
+                MARKER_SIZE, MARKER_SIZE,
+                background_color=color["stroke"],
+                stroke_color=color["stroke"],
+            )
+            elements.append(marker)
+
+    # Legend (only for multi-series)
+    if len(series) > 1:
+        legend_x = origin_x + CHART_WIDTH + 20
+        legend_y = 10
+        for s_idx, s in enumerate(series):
+            color_name = SERIES_COLORS[s_idx % len(SERIES_COLORS)]
+            color = get_color(color_name)
+            # Color swatch line
+            swatch = create_line(
+                legend_x, legend_y + 8,
+                legend_x + 20, legend_y + 8,
+                stroke_color=color["stroke"], stroke_width=3,
+            )
+            elements.append(swatch)
+            # Label
+            lbl = s.get("label", f"Series {s_idx + 1}")
+            lw = estimate_text_width(lbl, 12)
+            legend_text = create_text(
+                gen_id(), lbl,
+                x=legend_x + 25, y=legend_y,
+                font_size=12, width=lw, height=16,
+            )
+            elements.append(legend_text)
+            legend_y += 22
 
     # Title
     if title:
