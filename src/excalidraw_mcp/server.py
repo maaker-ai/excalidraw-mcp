@@ -13,6 +13,7 @@ from excalidraw_mcp.tools.mermaid import register_mermaid_tools
 from excalidraw_mcp.tools.mindmap import register_mindmap_tools
 from excalidraw_mcp.tools.er_diagram import register_er_tools
 from excalidraw_mcp.tools.timeline import register_timeline_tools
+from excalidraw_mcp.tools.class_diagram import register_class_diagram_tools
 
 register_flowchart_tools(mcp)
 register_architecture_tools(mcp)
@@ -21,6 +22,7 @@ register_mermaid_tools(mcp)
 register_mindmap_tools(mcp)
 register_er_tools(mcp)
 register_timeline_tools(mcp)
+register_class_diagram_tools(mcp)
 register_modify_tools(mcp)
 register_export_tools(mcp)
 register_read_tools(mcp)
