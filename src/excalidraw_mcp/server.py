@@ -17,6 +17,7 @@ from excalidraw_mcp.tools.class_diagram import register_class_diagram_tools
 from excalidraw_mcp.tools.state_diagram import register_state_diagram_tools
 from excalidraw_mcp.tools.pie_chart import register_pie_chart_tools
 from excalidraw_mcp.tools.kanban import register_kanban_tools
+from excalidraw_mcp.tools.network import register_network_tools
 
 register_flowchart_tools(mcp)
 register_architecture_tools(mcp)
@@ -29,6 +30,7 @@ register_class_diagram_tools(mcp)
 register_state_diagram_tools(mcp)
 register_pie_chart_tools(mcp)
 register_kanban_tools(mcp)
+register_network_tools(mcp)
 register_modify_tools(mcp)
 register_export_tools(mcp)
 register_read_tools(mcp)
