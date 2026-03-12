@@ -19,6 +19,7 @@ from excalidraw_mcp.tools.pie_chart import register_pie_chart_tools
 from excalidraw_mcp.tools.kanban import register_kanban_tools
 from excalidraw_mcp.tools.network import register_network_tools
 from excalidraw_mcp.tools.quadrant import register_quadrant_tools
+from excalidraw_mcp.tools.user_journey import register_user_journey_tools
 
 register_flowchart_tools(mcp)
 register_architecture_tools(mcp)
@@ -33,6 +34,7 @@ register_pie_chart_tools(mcp)
 register_kanban_tools(mcp)
 register_network_tools(mcp)
 register_quadrant_tools(mcp)
+register_user_journey_tools(mcp)
 register_modify_tools(mcp)
 register_export_tools(mcp)
 register_read_tools(mcp)
