@@ -6,6 +6,7 @@ from mcp.server.fastmcp import FastMCP
 class FlowchartNode(BaseModel):
     label: str = Field(description="Node label text")
     color: Optional[str] = Field(default=None, description="Color name: blue, green, purple, yellow, red, gray, orange, pink")
+    shape: str = Field(default="rectangle", description="Node shape: rectangle (default), diamond (for decisions), ellipse (for start/end)")
 
 
 class FlowchartEdge(BaseModel):
@@ -47,13 +48,14 @@ def register_flowchart_tools(mcp: FastMCP):
         from excalidraw_mcp.layout.sugiyama import sugiyama_layout
         from excalidraw_mcp.utils.file_io import save_excalidraw
 
-        # 1. Prepare node data with colors
+        # 1. Prepare node data with colors and shapes
         node_data = []
         for node in nodes:
             color = get_color(node.color or "blue")
             node_data.append({
                 "label": node.label,
                 "color": node.color or "blue",
+                "shape": node.shape,
                 "bg": color["bg"],
                 "stroke": color["stroke"],
             })
@@ -71,8 +73,9 @@ def register_flowchart_tools(mcp: FastMCP):
         shape_map = {}
 
         for idx, item in enumerate(laid_out):
+            shape_type = item.get("shape", "rectangle")
             shape, text = create_labeled_shape(
-                "rectangle",
+                shape_type,
                 id=None,
                 label=item["label"],
                 x=item["x"], y=item["y"],

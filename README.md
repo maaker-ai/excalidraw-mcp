@@ -99,7 +99,7 @@ Works with existing `.excalidraw` files — read their structure, add/remove nod
 
 ```
 Input:
-  nodes: [{label: "Step 1", color?: "blue"}]
+  nodes: [{label: "Step 1", color?: "blue", shape?: "rectangle"}]
   edges: [{from: "Step 1", to: "Step 2", label?: "next"}]
   direction?: "LR" | "RL" | "TB" | "BT"  (default: "LR")
   title?: "My Flowchart"
@@ -109,6 +109,8 @@ Output: Path to generated .excalidraw file
 ```
 
 **Colors**: blue, green, purple, yellow, red, gray, orange, pink
+
+**Shapes**: rectangle (default), diamond (decisions), ellipse (start/end)
 
 ### `create_architecture_diagram`
 

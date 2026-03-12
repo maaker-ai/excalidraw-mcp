@@ -263,3 +263,116 @@ def test_arrow_label_position():
 
     assert abs(text_mid_x - arrow_mid_x) < 5
     assert abs(text_mid_y - arrow_mid_y) < 5
+
+
+# ========== Iteration 2: Node shape support ==========
+
+def test_flowchart_node_shape_field():
+    """FlowchartNode should accept a shape field."""
+    from excalidraw_mcp.tools.flowchart import FlowchartNode
+    node = FlowchartNode(label="Decision", shape="diamond")
+    assert node.shape == "diamond"
+
+    node_default = FlowchartNode(label="Step")
+    assert node_default.shape == "rectangle"
+
+
+def test_flowchart_node_shape_ellipse():
+    """FlowchartNode should accept ellipse shape."""
+    from excalidraw_mcp.tools.flowchart import FlowchartNode
+    node = FlowchartNode(label="Start", shape="ellipse")
+    assert node.shape == "ellipse"
+
+
+def test_flowchart_generates_diamond_shape():
+    """create_flowchart with diamond shape should produce diamond elements."""
+    import tempfile
+    from excalidraw_mcp.tools.flowchart import FlowchartNode, FlowchartEdge
+    # Simulate what create_flowchart does internally
+    from excalidraw_mcp.elements.text import create_labeled_shape
+    from excalidraw_mcp.elements.style import get_color
+
+    color = get_color("yellow")
+    shape, text = create_labeled_shape(
+        "diamond", id="d1", label="Decision?",
+        x=0, y=0,
+        background_color=color["bg"], stroke_color=color["stroke"],
+    )
+    assert shape["type"] == "diamond"
+    assert text["containerId"] == "d1"
+
+
+def test_flowchart_generates_ellipse_shape():
+    """create_flowchart with ellipse shape should produce ellipse elements."""
+    from excalidraw_mcp.elements.text import create_labeled_shape
+    from excalidraw_mcp.elements.style import get_color
+
+    color = get_color("green")
+    shape, text = create_labeled_shape(
+        "ellipse", id="e1", label="Start",
+        x=0, y=0,
+        background_color=color["bg"], stroke_color=color["stroke"],
+    )
+    assert shape["type"] == "ellipse"
+    assert text["containerId"] == "e1"
+
+
+def test_flowchart_mixed_shapes_e2e():
+    """End-to-end: flowchart with mixed shapes (rectangle, diamond, ellipse)."""
+    import tempfile
+    from excalidraw_mcp.elements.text import create_labeled_shape
+    from excalidraw_mcp.elements.arrows import create_arrow
+    from excalidraw_mcp.elements.style import get_color
+    from excalidraw_mcp.layout.sugiyama import sugiyama_layout
+    from excalidraw_mcp.utils.file_io import save_excalidraw, load_excalidraw
+
+    nodes = [
+        {"label": "Start", "color": "green", "shape": "ellipse"},
+        {"label": "Process", "color": "blue", "shape": "rectangle"},
+        {"label": "Decision?", "color": "yellow", "shape": "diamond"},
+        {"label": "End", "color": "red", "shape": "ellipse"},
+    ]
+    edge_data = [
+        {"from": "Start", "to": "Process"},
+        {"from": "Process", "to": "Decision?"},
+        {"from": "Decision?", "to": "End"},
+    ]
+
+    laid_out = sugiyama_layout(nodes, edge_data, direction="LR")
+    all_elements = []
+    shape_map = {}
+
+    for idx, item in enumerate(laid_out):
+        shape_type = nodes[idx].get("shape", "rectangle")
+        color = get_color(nodes[idx]["color"])
+        shape, text = create_labeled_shape(
+            shape_type,
+            id=None, label=item["label"],
+            x=item["x"], y=item["y"],
+            width=item["width"], height=item["height"],
+            background_color=color["bg"], stroke_color=color["stroke"],
+        )
+        all_elements.extend([shape, text])
+        shape_map[item["label"]] = shape
+
+    for edge in edge_data:
+        result = create_arrow(None, shape_map[edge["from"]], shape_map[edge["to"]])
+        all_elements.extend(result)
+
+    with tempfile.NamedTemporaryFile(suffix=".excalidraw", delete=False) as f:
+        path = f.name
+
+    try:
+        save_excalidraw(all_elements, path)
+        data = load_excalidraw(path)
+        elements = data["elements"]
+
+        ellipses = [e for e in elements if e["type"] == "ellipse"]
+        diamonds = [e for e in elements if e["type"] == "diamond"]
+        rectangles = [e for e in elements if e["type"] == "rectangle"]
+
+        assert len(ellipses) == 2, f"Expected 2 ellipses, got {len(ellipses)}"
+        assert len(diamonds) == 1, f"Expected 1 diamond, got {len(diamonds)}"
+        assert len(rectangles) == 1, f"Expected 1 rectangle, got {len(rectangles)}"
+    finally:
+        os.unlink(path)
