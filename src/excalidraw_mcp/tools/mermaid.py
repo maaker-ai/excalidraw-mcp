@@ -191,6 +191,81 @@ def _parse_edge_line(line: str, node_registry: dict, edges: list, current_group:
         i += 2
 
 
+def parse_mermaid_sequence(mermaid_text: str) -> tuple[list[str], list[dict]]:
+    """Parse Mermaid sequence diagram syntax.
+
+    Supported:
+        sequenceDiagram
+        participant A as Alice
+        Alice->>Bob: message      (solid arrow)
+        Bob-->>Alice: response    (dashed return arrow)
+        Alice->>Alice: self       (self-message)
+
+    Returns:
+        (participants, messages) where participants is a list of display names
+        and messages have from, to, label, style
+    """
+    lines = mermaid_text.strip().split("\n")
+    aliases: dict[str, str] = {}  # short -> display name
+    participants_ordered: list[str] = []
+    messages: list[dict] = []
+
+    for line in lines:
+        stripped = line.strip()
+
+        if not stripped or stripped == "sequenceDiagram" or stripped.startswith("%%"):
+            continue
+
+        # participant A as Alice
+        m = re.match(r"participant\s+(\S+)\s+as\s+(.+)$", stripped)
+        if m:
+            short, display = m.group(1), m.group(2).strip()
+            aliases[short] = display
+            if display not in participants_ordered:
+                participants_ordered.append(display)
+            continue
+
+        # participant Alice (no alias)
+        m = re.match(r"participant\s+(\S+)\s*$", stripped)
+        if m:
+            name = m.group(1)
+            if name not in participants_ordered:
+                participants_ordered.append(name)
+            continue
+
+        # Message patterns:
+        # A->>B: text       (solid)
+        # A-->>B: text      (dashed)
+        # A-)B: text        (async, treat as solid)
+        # A--)B: text       (async dashed)
+        m = re.match(r"(\S+?)\s*(-->>|->>|--\)|->)\s*(\S+?)\s*:\s*(.*)$", stripped)
+        if m:
+            from_id = m.group(1)
+            arrow = m.group(2)
+            to_id = m.group(3)
+            label = m.group(4).strip()
+
+            # Resolve aliases
+            from_name = aliases.get(from_id, from_id)
+            to_name = aliases.get(to_id, to_id)
+
+            # Auto-register participants
+            if from_name not in participants_ordered:
+                participants_ordered.append(from_name)
+            if to_name not in participants_ordered:
+                participants_ordered.append(to_name)
+
+            style = "dashed" if arrow.startswith("--") else "solid"
+            messages.append({
+                "from": from_name,
+                "to": to_name,
+                "label": label,
+                "style": style,
+            })
+
+    return participants_ordered, messages
+
+
 def register_mermaid_tools(mcp: FastMCP):
     @mcp.tool()
     def import_mermaid_flowchart(
@@ -308,3 +383,36 @@ def register_mermaid_tools(mcp: FastMCP):
         path = output_path or "/tmp/mermaid-import.excalidraw"
         result_path = save_excalidraw(all_elements, path)
         return f"Mermaid flowchart imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+
+    @mcp.tool()
+    def import_mermaid(
+        mermaid: str,
+        output_path: Optional[str] = None,
+    ) -> str:
+        """Import any Mermaid diagram and convert to Excalidraw.
+
+        Auto-detects diagram type (flowchart or sequence diagram) and
+        generates the appropriate Excalidraw diagram.
+
+        Args:
+            mermaid: Mermaid diagram text (flowchart or sequenceDiagram)
+            output_path: Optional output file path
+
+        Returns:
+            Absolute path to the generated .excalidraw file
+        """
+        first_line = mermaid.strip().split("\n")[0].strip()
+
+        if first_line.lower().startswith("sequencediagram"):
+            # Sequence diagram
+            from .sequence import create_sequence_elements
+
+            participants, messages = parse_mermaid_sequence(mermaid)
+            elements = create_sequence_elements(participants, messages)
+
+            path = output_path or "/tmp/mermaid-import.excalidraw"
+            result_path = save_excalidraw(elements, path)
+            return f"Mermaid sequence diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+        else:
+            # Flowchart (default)
+            return import_mermaid_flowchart(mermaid=mermaid, output_path=output_path)
