@@ -395,6 +395,73 @@ def parse_mermaid_class(mermaid_text: str) -> tuple[list[dict], list[dict]]:
     return list(class_registry.values()), relationships
 
 
+def parse_mermaid_state(mermaid_text: str) -> tuple[list[dict], list[dict]]:
+    """Parse Mermaid state diagram syntax.
+
+    Supported:
+        stateDiagram-v2
+        [*] --> StateA          (initial transition)
+        StateA --> StateB : event
+        StateB --> [*]          (final transition)
+
+    Returns:
+        (states, transitions) where states have name, is_initial, is_final
+    """
+    lines = mermaid_text.strip().split("\n")
+
+    state_registry: dict[str, dict] = {}
+    transitions: list[dict] = []
+    initial_targets: set[str] = set()
+    final_sources: set[str] = set()
+
+    for line in lines:
+        stripped = line.strip()
+
+        if not stripped or stripped.startswith("stateDiagram") or stripped.startswith("%%"):
+            continue
+
+        # Transition: A --> B : label
+        m = re.match(r'(\[\*\]|\w+)\s*-->\s*(\[\*\]|\w+)(?:\s*:\s*(.+))?', stripped)
+        if m:
+            from_name = m.group(1).strip()
+            to_name = m.group(2).strip()
+            label = (m.group(3) or "").strip()
+
+            # Handle [*] for initial/final
+            if from_name == "[*]":
+                initial_targets.add(to_name)
+                _ensure_state(state_registry, to_name)
+                transitions.append({"from": to_name, "to": to_name, "label": label})
+                continue
+            elif to_name == "[*]":
+                final_sources.add(from_name)
+                _ensure_state(state_registry, from_name)
+                continue
+
+            _ensure_state(state_registry, from_name)
+            _ensure_state(state_registry, to_name)
+            transitions.append({"from": from_name, "to": to_name, "label": label})
+
+    # Mark initial/final states
+    for name in initial_targets:
+        if name in state_registry:
+            state_registry[name]["is_initial"] = True
+    for name in final_sources:
+        if name in state_registry:
+            state_registry[name]["is_final"] = True
+
+    # Filter out self-loops from [*] handling
+    transitions = [t for t in transitions if not (t["from"] == t["to"] and not t["label"])]
+
+    return list(state_registry.values()), transitions
+
+
+def _ensure_state(registry: dict, name: str):
+    """Ensure a state exists in the registry."""
+    if name not in registry:
+        registry[name] = {"name": name, "is_initial": False, "is_final": False}
+
+
 def _ensure_class(registry: dict, name: str):
     """Ensure a class exists in the registry."""
     if name not in registry:
@@ -550,6 +617,16 @@ def register_mermaid_tools(mcp: FastMCP):
             path = output_path or "/tmp/mermaid-import.excalidraw"
             result_path = save_excalidraw(elements, path, theme=theme)
             return f"Mermaid sequence diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+        elif first_line.lower().startswith("statediagram"):
+            # State diagram
+            from .state_diagram import create_state_elements
+
+            states, transitions = parse_mermaid_state(mermaid)
+            elements = create_state_elements(states, transitions)
+
+            path = output_path or "/tmp/mermaid-import.excalidraw"
+            result_path = save_excalidraw(elements, path, theme=theme)
+            return f"Mermaid state diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
         elif first_line.lower().startswith("classdiagram"):
             # Class diagram
             from .class_diagram import create_class_elements
