@@ -24,6 +24,7 @@ DIAGRAM_TYPES = [
     {"name": "radar_chart", "tool": "create_radar_chart", "description": "Radar/spider charts with multi-series overlay"},
     {"name": "bar_chart", "tool": "create_bar_chart", "description": "Vertical bar charts with auto-scaled bars and labels"},
     {"name": "line_chart", "tool": "create_line_chart", "description": "Line charts with multi-series support"},
+    {"name": "decision_tree", "tool": "create_decision_tree", "description": "Decision trees with diamond decisions and rectangular outcomes"},
     {"name": "mermaid_import", "tool": "import_mermaid", "description": "Import Mermaid syntax (flowchart, sequence, class, state)"},
     {"name": "read", "tool": "read_diagram", "description": "Read and analyze existing .excalidraw files"},
     {"name": "modify", "tool": "modify_diagram", "description": "Add/remove nodes and connections to existing diagrams"},
