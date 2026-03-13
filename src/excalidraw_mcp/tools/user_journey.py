@@ -115,7 +115,7 @@ def create_journey_elements(
 
     # Title
     if title:
-        elements.insert(0, create_centered_title(title, elements, y=-60))
+        elements.insert(0, create_centered_title(title, elements))
 
     return elements
 

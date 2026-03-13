@@ -100,7 +100,7 @@ def create_timeline_elements(
 
     # Title
     if title:
-        elements.insert(0, create_centered_title(title, elements, y=-40))
+        elements.insert(0, create_centered_title(title, elements))
 
     # Clean up temp keys
     for evt in events:
