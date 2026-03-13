@@ -7,7 +7,7 @@
 ```bash
 # 开发
 uv sync --dev
-uv run pytest                    # 运行测试（91+ tests）
+uv run pytest                    # 运行测试（200+ tests）
 uv run excalidraw-mcp            # 本地启动 MCP server
 
 # 构建 & 发布（手动）
@@ -26,8 +26,11 @@ uv publish --token <PYPI_TOKEN>  # 发布到 PyPI
 
 1. 更新 `pyproject.toml` 中的 `version`
 2. 提交并推送到 main
-3. 在 GitHub 创建 Release，tag 格式 `v0.x.0`
-4. GitHub Actions 自动构建并发布到 PyPI
+3. 创建 tag：`git tag v0.x.0 && git push origin --tags`
+4. **必须创建 GitHub Release**：`gh release create v0.x.0 --title "v0.x.0" --notes "..."`
+5. GitHub Actions 自动构建并发布到 PyPI
+
+> **⚠️ 踩坑记录**：只 push tag 不会触发发布！workflow 触发条件是 `on: release: types: [published]`，必须通过 `gh release create` 或 GitHub 网页创建 Release 才能触发。v0.4.0 就因为只 push tag 没创建 Release 导致未发布到 PyPI。
 
 ### Trusted Publisher 配置（已完成）
 
@@ -46,26 +49,45 @@ PyPI 端配置：Owner=`maaker-ai`, Repo=`excalidraw-mcp`, Workflow=`publish.yml
 
 ```
 src/excalidraw_mcp/
-├── server.py              # MCP server 入口，注册 10 个 tools
+├── server.py              # MCP server 入口，注册 25+ tools
 ├── elements/              # Excalidraw 元素生成
-│   ├── text.py            # 文本 + 带标签的形状（CJK 宽度估算，多行支持）
+│   ├── text.py            # 文本 + 带标签的形状（CJK 宽度估算，多行支持，字体族）
 │   ├── arrows.py          # 箭头（fixedPoint + orbit，边标签，肘形路由）
 │   ├── shapes.py          # 矩形、椭圆、菱形
+│   ├── lines.py           # 共享线段工具
 │   ├── groups.py          # 分组框架（虚线背景矩形 + 标签）
 │   └── style.py           # 8 色基础 + 30+ 技术品牌色
 ├── layout/                # 布局引擎
 │   ├── sugiyama.py        # Sugiyama 分层布局（grandalf）— 流程图主引擎
 │   └── grid.py            # 网格/分层布局 — 架构图使用
-├── tools/                 # MCP 工具定义
-│   ├── flowchart.py       # create_flowchart（形状/分组/边标签/线型）
-│   ├── architecture.py    # create_architecture_diagram（连接标签/组件色）
-│   ├── sequence.py        # create_sequence_diagram（UML 时序图）
-│   ├── mindmap.py         # create_mindmap（树形思维导图）
-│   ├── er_diagram.py      # create_er_diagram（ER 实体关系图）
-│   ├── mermaid.py         # import_mermaid_flowchart（Mermaid 导入）
-│   ├── modify.py          # modify_diagram
-│   ├── read.py            # read_diagram
-│   └── export.py          # export_diagram
+├── tools/                 # MCP 工具定义（25+ 图表类型）
+│   ├── flowchart.py       # 流程图（形状/分组/边标签/线型）
+│   ├── architecture.py    # 分层架构图
+│   ├── sequence.py        # UML 时序图
+│   ├── mindmap.py         # 树形思维导图
+│   ├── er_diagram.py      # ER 实体关系图
+│   ├── class_diagram.py   # UML 类图
+│   ├── state_diagram.py   # UML 状态机
+│   ├── timeline.py        # 时间线/甘特图
+│   ├── pie_chart.py       # 饼图
+│   ├── bar_chart.py       # 柱状图
+│   ├── line_chart.py      # 折线图（多系列/标记/图例）
+│   ├── radar.py           # 雷达/蛛网图
+│   ├── table.py           # 网格表格
+│   ├── kanban.py          # 看板
+│   ├── network.py         # 网络拓扑
+│   ├── quadrant.py        # 四象限矩阵
+│   ├── user_journey.py    # 用户旅程图
+│   ├── wireframe.py       # UI 线框图
+│   ├── org_chart.py       # 组织架构图
+│   ├── swot.py            # SWOT 分析
+│   ├── decision_tree.py   # 决策树
+│   ├── mermaid.py         # Mermaid 导入（flowchart/sequence/class/state/pie）
+│   ├── unified.py         # 统一路由 create_diagram
+│   ├── help.py            # 图表类型列表
+│   ├── modify.py          # 修改已有图表
+│   ├── read.py            # 读取图表
+│   └── export.py          # SVG 导出
 └── utils/
     ├── file_io.py         # save/load .excalidraw 文件
     ├── ids.py             # gen_id() 共享 ID 生成器
