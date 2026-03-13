@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from mcp.server.fastmcp import FastMCP
 
 from ..utils.ids import gen_id
-from ..elements.text import create_labeled_shape, create_text, estimate_text_width
+from ..elements.text import create_labeled_shape, create_text, estimate_text_width, create_centered_title
 from ..elements.style import get_color
 from ..utils.file_io import save_excalidraw
 
@@ -212,12 +212,7 @@ def create_sequence_elements(
 
     # 5. Title
     if title:
-        title_width = estimate_text_width(title, 24)
-        title_text = create_text(
-            gen_id(), title, x=0, y=-50,
-            font_size=24, width=title_width,
-        )
-        elements.insert(0, title_text)
+        elements.insert(0, create_centered_title(title, elements))
 
     return elements
 
@@ -238,6 +233,7 @@ def register_sequence_tools(mcp: FastMCP):
         messages: list[SequenceMessage],
         title: Optional[str] = None,
         output_path: Optional[str] = None,
+        theme: str = "light",
     ) -> str:
         """Create a UML-style sequence diagram.
 
@@ -262,5 +258,5 @@ def register_sequence_tools(mcp: FastMCP):
         elements = create_sequence_elements(participants, msg_dicts, title=title)
 
         path = output_path or "/tmp/sequence.excalidraw"
-        result_path = save_excalidraw(elements, path)
+        result_path = save_excalidraw(elements, path, theme=theme)
         return f"Sequence diagram saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"

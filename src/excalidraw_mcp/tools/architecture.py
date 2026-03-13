@@ -4,6 +4,7 @@ def register_architecture_tools(mcp):
         layers: list[dict],
         connections: list[dict] | None = None,
         output_path: str | None = None,
+        theme: str = "light",
     ) -> str:
         """Create a layered architecture diagram.
 
@@ -78,5 +79,5 @@ def register_architecture_tools(mcp):
                 all_elements.extend(result)
 
         path = output_path or "/tmp/architecture.excalidraw"
-        result_path = save_excalidraw(all_elements, path)
+        result_path = save_excalidraw(all_elements, path, theme=theme)
         return f"Architecture diagram saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"

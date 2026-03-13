@@ -68,10 +68,8 @@ def route_diagram(
                 all_elements.extend(result)
 
         if title:
-            from ..elements.text import create_text
-            from ..utils.ids import gen_id
-            tw = estimate_text_width(title, 28)
-            all_elements.insert(0, create_text(gen_id(), title, x=0, y=-50, font_size=28, width=tw))
+            from ..elements.text import create_centered_title
+            all_elements.insert(0, create_centered_title(title, all_elements, font_size=28))
 
         path = output_path or "/tmp/flowchart.excalidraw"
         result_path = save_excalidraw(all_elements, path, theme=theme)

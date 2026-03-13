@@ -96,6 +96,35 @@ def create_text(id: str, text: str, x: float, y: float,
 from ..utils.ids import gen_id as _gen_id
 
 
+def create_centered_title(title: str, elements: list[dict], y: float = -50, font_size: int = 24) -> dict:
+    """Create a title text element centered over the bounding box of existing elements.
+
+    Args:
+        title: Title text
+        elements: List of existing elements to center over
+        y: Y position for the title
+        font_size: Font size
+
+    Returns:
+        Title text element dict
+    """
+    # Compute bounding box of all elements that have x/width
+    positioned = [e for e in elements if "x" in e and "width" in e]
+    if positioned:
+        min_x = min(e["x"] for e in positioned)
+        max_x = max(e["x"] + e["width"] for e in positioned)
+        content_center = (min_x + max_x) / 2
+    else:
+        content_center = 0
+
+    tw = estimate_text_width(title, font_size)
+    return create_text(
+        _gen_id(), title,
+        x=content_center - tw / 2, y=y,
+        font_size=font_size, width=tw,
+    )
+
+
 def create_labeled_shape(
     shape_type: str,
     id: str,

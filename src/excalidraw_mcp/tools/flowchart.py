@@ -29,6 +29,7 @@ def register_flowchart_tools(mcp: FastMCP):
         direction: str = "LR",
         title: Optional[str] = None,
         output_path: Optional[str] = None,
+        theme: str = "light",
     ) -> str:
         """Create a flowchart diagram with Sugiyama hierarchical auto-layout.
 
@@ -42,6 +43,7 @@ def register_flowchart_tools(mcp: FastMCP):
             direction: Layout direction - "LR" (left to right), "RL", "TB" (top to bottom), "BT"
             title: Optional diagram title
             output_path: Optional output file path (default: /tmp/flowchart.excalidraw)
+            theme: Color theme - "light" (default) or "dark"
 
         Returns:
             Absolute path to the generated .excalidraw file
@@ -130,16 +132,10 @@ def register_flowchart_tools(mcp: FastMCP):
 
         # 6. Add title if provided
         if title:
-            from excalidraw_mcp.elements.text import create_text
-            from excalidraw_mcp.utils.ids import gen_id
-            title_width = estimate_text_width(title, 28)
-            title_text = create_text(
-                gen_id(), title, x=0, y=-50,
-                font_size=28, width=title_width,
-            )
-            all_elements.insert(0, title_text)
+            from excalidraw_mcp.elements.text import create_centered_title
+            all_elements.insert(0, create_centered_title(title, all_elements, font_size=28))
 
         # 7. Save
         path = output_path or "/tmp/flowchart.excalidraw"
-        result_path = save_excalidraw(all_elements, path)
+        result_path = save_excalidraw(all_elements, path, theme=theme)
         return f"Flowchart saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"

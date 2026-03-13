@@ -589,3 +589,22 @@ def test_flowchart_node_no_description():
     from excalidraw_mcp.tools.flowchart import FlowchartNode
     node = FlowchartNode(label="Step")
     assert node.description is None
+
+
+# ========== Iteration 19: Sticky notes ==========
+
+def test_create_sticky_note():
+    """Create a standalone sticky note element."""
+    from excalidraw_mcp.elements.shapes import create_rectangle
+    from excalidraw_mcp.elements.text import create_text
+    from excalidraw_mcp.utils.ids import gen_id
+
+    note_id = gen_id()
+    note = create_rectangle(
+        note_id, 0, 0, 200, 100,
+        background_color="#fff3bf",
+        stroke_color="#e8590c",
+        strokeWidth=1,
+    )
+    assert note["type"] == "rectangle"
+    assert note["backgroundColor"] == "#fff3bf"

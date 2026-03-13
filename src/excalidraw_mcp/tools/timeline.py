@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from mcp.server.fastmcp import FastMCP
 
 from ..utils.ids import gen_id
-from ..elements.text import create_labeled_shape, create_text, estimate_text_width
+from ..elements.text import create_labeled_shape, create_text, estimate_text_width, create_centered_title
 from ..elements.style import get_color
 from ..utils.file_io import save_excalidraw
 
@@ -100,12 +100,7 @@ def create_timeline_elements(
 
     # Title
     if title:
-        title_width = estimate_text_width(title, 24)
-        title_text = create_text(
-            gen_id(), title, x=0, y=-40,
-            font_size=24, width=title_width,
-        )
-        elements.insert(0, title_text)
+        elements.insert(0, create_centered_title(title, elements, y=-40))
 
     # Clean up temp keys
     for evt in events:
