@@ -12,7 +12,7 @@ from excalidraw_mcp.utils.file_io import save_excalidraw, load_excalidraw
 
 def test_estimate_text_width_ascii():
     w = estimate_text_width("Hello", 20)
-    assert 50 < w < 60  # ~55
+    assert 55 < w < 70  # ~62 (Excalifont is wider than sans-serif)
 
 
 def test_estimate_text_width_cjk():

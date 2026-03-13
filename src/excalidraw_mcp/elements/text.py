@@ -10,9 +10,12 @@ def estimate_text_width(text: str, font_size: int = 20) -> float:
 
     - CJK 字符 (U+4E00-U+9FFF, U+3400-U+4DBF, U+20000-U+2A6DF, U+F900-U+FAFF, U+2F800-U+2FA1F):
       font_size * 1.1
-    - ASCII 字母/数字: font_size * 0.55
-    - 空格: font_size * 0.25
-    - 其他: font_size * 0.6
+    - ASCII 字母/数字: font_size * 0.62
+    - 空格: font_size * 0.35
+    - 其他: font_size * 0.65
+
+    Note: Excalidraw's default hand-drawn font (Excalifont) renders wider than
+    typical sans-serif fonts. These coefficients include margin to prevent clipping.
     """
     total = 0.0
     for ch in text:
@@ -26,11 +29,11 @@ def estimate_text_width(text: str, font_size: int = 20) -> float:
                 0xFF00 <= cp <= 0xFFEF):   # Halfwidth and Fullwidth Forms
             total += font_size * 1.1
         elif ch == ' ':
-            total += font_size * 0.25
+            total += font_size * 0.35
         elif ('a' <= ch <= 'z') or ('A' <= ch <= 'Z') or ('0' <= ch <= '9'):
-            total += font_size * 0.55
+            total += font_size * 0.62
         else:
-            total += font_size * 0.6
+            total += font_size * 0.65
     return total
 
 
