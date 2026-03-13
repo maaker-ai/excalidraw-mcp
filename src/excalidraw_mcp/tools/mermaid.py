@@ -507,9 +507,164 @@ def _ensure_class(registry: dict, name: str):
         registry[name] = {"name": name, "attributes": [], "methods": []}
 
 
+def import_mermaid_flowchart(
+    mermaid: str,
+    output_path: Optional[str] = None,
+    theme: str = "light",
+) -> str:
+    """Import a Mermaid flowchart and convert to Excalidraw.
+
+    Args:
+        mermaid: Mermaid flowchart text
+        output_path: Optional output file path
+        theme: Color theme - "light" (default) or "dark"
+
+    Returns:
+        Result string containing the absolute path to the generated .excalidraw file
+    """
+    from .flowchart import FlowchartNode, FlowchartEdge
+    from ..elements.text import create_labeled_shape, estimate_text_width
+    from ..elements.arrows import create_arrow
+    from ..elements.style import get_color
+    from ..layout.sugiyama import sugiyama_layout
+
+    direction = "LR"
+    first_line = mermaid.strip().split("\n")[0].strip()
+    dir_match = re.search(r"(?:graph|flowchart)\s+(LR|RL|TD|TB|BT)", first_line)
+    if dir_match:
+        d = dir_match.group(1)
+        direction = "TB" if d == "TD" else d
+
+    nodes, edges = parse_mermaid_flowchart(mermaid)
+
+    fc_nodes = [
+        FlowchartNode(
+            label=n["label"],
+            shape=n.get("shape", "rectangle"),
+            group=n.get("group"),
+        )
+        for n in nodes
+    ]
+
+    fc_edges = []
+    for e in edges:
+        from_label = next((n["label"] for n in nodes if n["id"] == e["from"]), e["from"])
+        to_label = next((n["label"] for n in nodes if n["id"] == e["to"]), e["to"])
+        fc_edges.append(FlowchartEdge(
+            **{"from": from_label, "to": to_label},
+            label=e.get("label"),
+            style=e.get("style", "solid"),
+        ))
+
+    node_data = []
+    for node in fc_nodes:
+        color = get_color(node.color or "blue")
+        node_data.append({
+            "label": node.label,
+            "shape": node.shape,
+            "group": node.group,
+            "bg": color["bg"],
+            "stroke": color["stroke"],
+        })
+
+    edge_data = [{"from": e.from_node, "to": e.to_node} for e in fc_edges]
+    laid_out = sugiyama_layout(node_data, edge_data, direction=direction)
+
+    all_elements = []
+    shape_map = {}
+    group_bounds: dict[str, list] = {}
+
+    for idx, item in enumerate(laid_out):
+        shape_type = item.get("shape", "rectangle")
+        shape, text = create_labeled_shape(
+            shape_type, id=None, label=item["label"],
+            x=item["x"], y=item["y"],
+            width=item["width"], height=item["height"],
+            background_color=item["bg"],
+            stroke_color=item.get("stroke", "#1e1e1e"),
+        )
+        all_elements.extend([shape, text])
+        shape_map[item["label"]] = shape
+
+        group_name = item.get("group")
+        if group_name:
+            group_bounds.setdefault(group_name, []).append(
+                {"x": item["x"], "y": item["y"], "width": item["width"], "height": item["height"]}
+            )
+
+    if group_bounds:
+        from ..elements.groups import create_group_frame
+        frame_elements = []
+        for group_name, bounds in group_bounds.items():
+            frame_elements.extend(create_group_frame(group_name, bounds))
+        all_elements = frame_elements + all_elements
+
+    for edge in fc_edges:
+        start_el = shape_map.get(edge.from_node)
+        end_el = shape_map.get(edge.to_node)
+        if start_el and end_el:
+            result = create_arrow(None, start_el, end_el, label=edge.label, strokeStyle=edge.style)
+            all_elements.extend(result)
+
+    path = output_path or "/tmp/mermaid-import.excalidraw"
+    result_path = save_excalidraw(all_elements, path, theme=theme)
+    return f"Mermaid flowchart imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+
+
+def import_mermaid(
+    mermaid: str,
+    output_path: Optional[str] = None,
+    theme: str = "light",
+) -> str:
+    """Import any Mermaid diagram and convert to Excalidraw.
+
+    Auto-detects diagram type and generates the appropriate Excalidraw diagram.
+
+    Args:
+        mermaid: Mermaid diagram text
+        output_path: Optional output file path
+        theme: Color theme - "light" (default) or "dark"
+
+    Returns:
+        Result string containing the absolute path to the generated .excalidraw file
+    """
+    first_line = mermaid.strip().split("\n")[0].strip()
+
+    if first_line.lower().startswith("pie"):
+        from .pie_chart import create_pie_elements
+        slices, pie_title = parse_mermaid_pie(mermaid)
+        elements = create_pie_elements(slices, title=pie_title)
+        path = output_path or "/tmp/mermaid-import.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Mermaid pie chart imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+    elif first_line.lower().startswith("sequencediagram"):
+        from .sequence import create_sequence_elements
+        participants, messages = parse_mermaid_sequence(mermaid)
+        elements = create_sequence_elements(participants, messages)
+        path = output_path or "/tmp/mermaid-import.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Mermaid sequence diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+    elif first_line.lower().startswith("statediagram"):
+        from .state_diagram import create_state_elements
+        states, transitions = parse_mermaid_state(mermaid)
+        elements = create_state_elements(states, transitions)
+        path = output_path or "/tmp/mermaid-import.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Mermaid state diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+    elif first_line.lower().startswith("classdiagram"):
+        from .class_diagram import create_class_elements
+        classes, rels = parse_mermaid_class(mermaid)
+        elements = create_class_elements(classes, rels)
+        path = output_path or "/tmp/mermaid-import.excalidraw"
+        result_path = save_excalidraw(elements, path, theme=theme)
+        return f"Mermaid class diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+    else:
+        return import_mermaid_flowchart(mermaid=mermaid, output_path=output_path, theme=theme)
+
+
 def register_mermaid_tools(mcp: FastMCP):
-    @mcp.tool()
-    def import_mermaid_flowchart(
+    @mcp.tool(name="import_mermaid_flowchart")
+    def import_mermaid_flowchart_tool(
         mermaid: str,
         output_path: Optional[str] = None,
         theme: str = "light",
@@ -519,13 +674,6 @@ def register_mermaid_tools(mcp: FastMCP):
         Parses Mermaid flowchart syntax and generates a hand-drawn
         Excalidraw diagram with Sugiyama layout.
 
-        Supported Mermaid syntax:
-        - Node shapes: [rect], {diamond}, ([stadium]), ((circle))
-        - Arrows: -->, -.-> (dashed), ==> (thick)
-        - Edge labels: -->|label| or -- label -->
-        - Subgraphs: subgraph Name ... end
-        - Chaining: A --> B --> C
-
         Args:
             mermaid: Mermaid flowchart text
             output_path: Optional output file path
@@ -533,101 +681,10 @@ def register_mermaid_tools(mcp: FastMCP):
         Returns:
             Absolute path to the generated .excalidraw file
         """
-        from .flowchart import FlowchartNode, FlowchartEdge
+        return import_mermaid_flowchart(mermaid=mermaid, output_path=output_path, theme=theme)
 
-        # Parse direction from graph declaration
-        direction = "LR"
-        first_line = mermaid.strip().split("\n")[0].strip()
-        dir_match = re.search(r"(?:graph|flowchart)\s+(LR|RL|TD|TB|BT)", first_line)
-        if dir_match:
-            d = dir_match.group(1)
-            direction = "TB" if d == "TD" else d
-
-        nodes, edges = parse_mermaid_flowchart(mermaid)
-
-        # Convert to FlowchartNode/FlowchartEdge
-        fc_nodes = [
-            FlowchartNode(
-                label=n["label"],
-                shape=n.get("shape", "rectangle"),
-                group=n.get("group"),
-            )
-            for n in nodes
-        ]
-
-        fc_edges = []
-        for e in edges:
-            # Map node IDs to labels for the flowchart tool
-            from_label = next((n["label"] for n in nodes if n["id"] == e["from"]), e["from"])
-            to_label = next((n["label"] for n in nodes if n["id"] == e["to"]), e["to"])
-            fc_edges.append(FlowchartEdge(
-                **{"from": from_label, "to": to_label},
-                label=e.get("label"),
-                style=e.get("style", "solid"),
-            ))
-
-        # Use the flowchart tool's internals
-        from ..elements.text import create_labeled_shape, estimate_text_width
-        from ..elements.arrows import create_arrow
-        from ..elements.style import get_color
-        from ..layout.sugiyama import sugiyama_layout
-
-        node_data = []
-        for node in fc_nodes:
-            color = get_color(node.color or "blue")
-            node_data.append({
-                "label": node.label,
-                "shape": node.shape,
-                "group": node.group,
-                "bg": color["bg"],
-                "stroke": color["stroke"],
-            })
-
-        edge_data = [{"from": e.from_node, "to": e.to_node} for e in fc_edges]
-        laid_out = sugiyama_layout(node_data, edge_data, direction=direction)
-
-        all_elements = []
-        shape_map = {}
-        group_bounds: dict[str, list] = {}
-
-        for idx, item in enumerate(laid_out):
-            shape_type = item.get("shape", "rectangle")
-            shape, text = create_labeled_shape(
-                shape_type, id=None, label=item["label"],
-                x=item["x"], y=item["y"],
-                width=item["width"], height=item["height"],
-                background_color=item["bg"],
-                stroke_color=item.get("stroke", "#1e1e1e"),
-            )
-            all_elements.extend([shape, text])
-            shape_map[item["label"]] = shape
-
-            group_name = item.get("group")
-            if group_name:
-                group_bounds.setdefault(group_name, []).append(
-                    {"x": item["x"], "y": item["y"], "width": item["width"], "height": item["height"]}
-                )
-
-        if group_bounds:
-            from ..elements.groups import create_group_frame
-            frame_elements = []
-            for group_name, bounds in group_bounds.items():
-                frame_elements.extend(create_group_frame(group_name, bounds))
-            all_elements = frame_elements + all_elements
-
-        for edge in fc_edges:
-            start_el = shape_map.get(edge.from_node)
-            end_el = shape_map.get(edge.to_node)
-            if start_el and end_el:
-                result = create_arrow(None, start_el, end_el, label=edge.label, strokeStyle=edge.style)
-                all_elements.extend(result)
-
-        path = output_path or "/tmp/mermaid-import.excalidraw"
-        result_path = save_excalidraw(all_elements, path, theme=theme)
-        return f"Mermaid flowchart imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
-
-    @mcp.tool()
-    def import_mermaid(
+    @mcp.tool(name="import_mermaid")
+    def import_mermaid_tool(
         mermaid: str,
         output_path: Optional[str] = None,
         theme: str = "light",
@@ -644,48 +701,4 @@ def register_mermaid_tools(mcp: FastMCP):
         Returns:
             Absolute path to the generated .excalidraw file
         """
-        first_line = mermaid.strip().split("\n")[0].strip()
-
-        if first_line.lower().startswith("pie"):
-            # Pie chart
-            from .pie_chart import create_pie_elements
-
-            slices, pie_title = parse_mermaid_pie(mermaid)
-            elements = create_pie_elements(slices, title=pie_title)
-
-            path = output_path or "/tmp/mermaid-import.excalidraw"
-            result_path = save_excalidraw(elements, path, theme=theme)
-            return f"Mermaid pie chart imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
-        elif first_line.lower().startswith("sequencediagram"):
-            # Sequence diagram
-            from .sequence import create_sequence_elements
-
-            participants, messages = parse_mermaid_sequence(mermaid)
-            elements = create_sequence_elements(participants, messages)
-
-            path = output_path or "/tmp/mermaid-import.excalidraw"
-            result_path = save_excalidraw(elements, path, theme=theme)
-            return f"Mermaid sequence diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
-        elif first_line.lower().startswith("statediagram"):
-            # State diagram
-            from .state_diagram import create_state_elements
-
-            states, transitions = parse_mermaid_state(mermaid)
-            elements = create_state_elements(states, transitions)
-
-            path = output_path or "/tmp/mermaid-import.excalidraw"
-            result_path = save_excalidraw(elements, path, theme=theme)
-            return f"Mermaid state diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
-        elif first_line.lower().startswith("classdiagram"):
-            # Class diagram
-            from .class_diagram import create_class_elements
-
-            classes, rels = parse_mermaid_class(mermaid)
-            elements = create_class_elements(classes, rels)
-
-            path = output_path or "/tmp/mermaid-import.excalidraw"
-            result_path = save_excalidraw(elements, path, theme=theme)
-            return f"Mermaid class diagram imported to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
-        else:
-            # Flowchart (default)
-            return import_mermaid_flowchart(mermaid=mermaid, output_path=output_path, theme=theme)
+        return import_mermaid(mermaid=mermaid, output_path=output_path, theme=theme)

@@ -217,6 +217,31 @@ def create_sequence_elements(
     return elements
 
 
+def create_sequence_diagram(
+    participants: list[str],
+    messages: list[dict],
+    title: Optional[str] = None,
+    output_path: Optional[str] = None,
+    theme: str = "light",
+) -> str:
+    """Create a UML-style sequence diagram and save to file.
+
+    Args:
+        participants: List of participant names (ordered left to right)
+        messages: List of message dicts with from, to, label, and optional style
+        title: Optional diagram title
+        output_path: Optional output file path (default: /tmp/sequence.excalidraw)
+        theme: Color theme - "light" (default) or "dark"
+
+    Returns:
+        Result string containing the absolute path to the generated .excalidraw file
+    """
+    elements = create_sequence_elements(participants, messages, title=title)
+    path = output_path or "/tmp/sequence.excalidraw"
+    result_path = save_excalidraw(elements, path, theme=theme)
+    return f"Sequence diagram saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+
+
 class SequenceMessage(BaseModel):
     from_participant: str = Field(alias="from", description="Source participant name")
     to_participant: str = Field(alias="to", description="Target participant name")
@@ -227,8 +252,8 @@ class SequenceMessage(BaseModel):
 
 
 def register_sequence_tools(mcp: FastMCP):
-    @mcp.tool()
-    def create_sequence_diagram(
+    @mcp.tool(name="create_sequence_diagram")
+    def create_sequence_diagram_tool(
         participants: list[str],
         messages: list[SequenceMessage],
         title: Optional[str] = None,
@@ -254,9 +279,4 @@ def register_sequence_tools(mcp: FastMCP):
             {"from": m.from_participant, "to": m.to_participant, "label": m.label, "style": m.style}
             for m in messages
         ]
-
-        elements = create_sequence_elements(participants, msg_dicts, title=title)
-
-        path = output_path or "/tmp/sequence.excalidraw"
-        result_path = save_excalidraw(elements, path, theme=theme)
-        return f"Sequence diagram saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+        return create_sequence_diagram(participants, msg_dicts, title=title, output_path=output_path, theme=theme)

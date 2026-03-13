@@ -162,6 +162,29 @@ def _layout_node(
             current_y += child["_height"] + SIBLING_GAP
 
 
+def create_mindmap_diagram(
+    root: dict,
+    title: Optional[str] = None,
+    output_path: Optional[str] = None,
+    theme: str = "light",
+) -> str:
+    """Create a mind map diagram and save to file.
+
+    Args:
+        root: Tree dict with 'label' and optional 'children' (list of same structure)
+        title: Optional diagram title
+        output_path: Optional output file path (default: /tmp/mindmap.excalidraw)
+        theme: Color theme - "light" (default) or "dark"
+
+    Returns:
+        Result string containing the absolute path to the generated .excalidraw file
+    """
+    elements = create_mindmap_elements(root, title=title)
+    path = output_path or "/tmp/mindmap.excalidraw"
+    result_path = save_excalidraw(elements, path, theme=theme)
+    return f"Mind map saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+
+
 class MindmapNode(BaseModel):
     label: str = Field(description="Node label text")
     children: Optional[list["MindmapNode"]] = Field(default=None, description="Child nodes")
@@ -196,8 +219,4 @@ def register_mindmap_tools(mcp: FastMCP):
             return d
 
         root_dict = to_dict(root)
-        elements = create_mindmap_elements(root_dict, title=title)
-
-        path = output_path or "/tmp/mindmap.excalidraw"
-        result_path = save_excalidraw(elements, path, theme=theme)
-        return f"Mind map saved to: {result_path}\n\nOpen in Excalidraw: drag the file to https://excalidraw.com"
+        return create_mindmap_diagram(root_dict, title=title, output_path=output_path, theme=theme)
