@@ -28,7 +28,7 @@ DIAGRAM_TYPES = [
     {"name": "mermaid_import", "tool": "import_mermaid", "description": "Import Mermaid syntax (flowchart, sequence, class, state)"},
     {"name": "read", "tool": "read_diagram", "description": "Read and analyze existing .excalidraw files"},
     {"name": "modify", "tool": "modify_diagram", "description": "Add/remove nodes and connections to existing diagrams"},
-    {"name": "export", "tool": "export_to_svg", "description": "Export diagrams to SVG format"},
+    {"name": "export", "tool": "export_diagram", "description": "Export diagrams to SVG format"},
 ]
 
 
