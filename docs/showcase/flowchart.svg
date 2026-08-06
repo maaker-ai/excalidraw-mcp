@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20.0 -99.19999999999999 540.0 949.2" width="540.0" height="949.2">
+<rect x="-20.0" y="-99.19999999999999" width="540.0" height="949.2" fill="#ffffff" />
+<ellipse cx="100.0" cy="35.0" rx="100.0" ry="35.0" fill="#dee2e6" stroke="#495057" stroke-width="2" opacity="1.0" />
+<rect x="0.0" y="190.0" width="285.4000000000001" height="86.0" rx="8" ry="8" fill="#a5d8ff" stroke="#1971c2" stroke-width="2" opacity="1.0" />
+<polygon points="100.0,380.0 200.0,415.0 100.0,450.0 0.0,415.0" fill="#ffec99" stroke="#e8590c" stroke-width="2" opacity="1.0" />
+<rect x="0.0" y="570.0" width="341.8" height="86.0" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1.0" />
+<rect x="300.0" y="380.0" width="200" height="70" rx="8" ry="8" fill="#ffc9c9" stroke="#e03131" stroke-width="2" opacity="1.0" />
+<ellipse cx="100.0" cy="795.0" rx="100.0" ry="35.0" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1.0" />
+<text x="131.83999999999997" y="-49.8" font-size="28" fill="#1e1e1e" text-anchor="start" opacity="1.0" font-family="Arial, sans-serif">CI/CD Pipeline</text>
+<text x="100.0" y="42.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">User Push</text>
+<text x="142.70000000000005" y="240.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif"><tspan x="142.70000000000005" dy="0">CI Build</tspan><tspan x="142.70000000000005" dy="28.0">pnpm build</tspan></text>
+<text x="100.0" y="422.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">Tests Pass?</text>
+<text x="170.9" y="620.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif"><tspan x="170.9" dy="0">Deploy 部署</tspan><tspan x="170.9" dy="28.0">prod cluster</tspan></text>
+<text x="400.0" y="422.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">Notify Team</text>
+<text x="100.0" y="802.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">Done</text>
+<text x="135.45" y="515.6" font-size="16" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">yes</text>
+<text x="250.0" y="420.6" font-size="16" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">no</text>
+<text x="292.70000000000005" y="329.6" font-size="16" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">fix &amp; retry</text>
+<defs><marker id="arrowhead-end-arrow_wJoLFXXCGJ" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 100.0 70.0 L 142.70000000000005 190.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_wJoLFXXCGJ)"  />
+<defs><marker id="arrowhead-end-arrow_4XNGcWUg4m" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 142.70000000000005 276.0 L 100.0 380.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_4XNGcWUg4m)"  />
+<defs><marker id="arrowhead-end-arrow_3FaUBK2wNJ" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 100.0 450.0 L 170.9 570.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_3FaUBK2wNJ)"  />
+<defs><marker id="arrowhead-end-arrow_w2OEethPVS" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 200.0 415.0 L 300.0 415.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_w2OEethPVS)"  />
+<defs><marker id="arrowhead-end-arrow_TfFrUiNQ8x" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 300.0 415.0 L 285.4000000000001 233.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0" stroke-dasharray="8,4" marker-end="url(#arrowhead-end-arrow_TfFrUiNQ8x)"  />
+<defs><marker id="arrowhead-end-arrow_TXq3itURn7" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 170.9 656.0 L 100.0 760.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_TXq3itURn7)"  />
+</svg>

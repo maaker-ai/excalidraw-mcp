@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-20 -20 723.4000000000001 490" width="723.4000000000001" height="490">
+<rect x="-20" y="-20" width="723.4000000000001" height="490" fill="#ffffff" />
+<rect x="0" y="0" width="200" height="70" rx="8" ry="8" fill="#a5d8ff" stroke="#1971c2" stroke-width="2" opacity="1.0" />
+<rect x="240" y="0" width="200" height="70" rx="8" ry="8" fill="#a5d8ff" stroke="#1971c2" stroke-width="2" opacity="1.0" />
+<rect x="0" y="190" width="200" height="70" rx="8" ry="8" fill="#d0bfff" stroke="#7048e8" stroke-width="2" opacity="1.0" />
+<rect x="240" y="190" width="203.40000000000003" height="70" rx="8" ry="8" fill="#d0bfff" stroke="#7048e8" stroke-width="2" opacity="1.0" />
+<rect x="483.40000000000003" y="190" width="200" height="70" rx="8" ry="8" fill="#d0bfff" stroke="#7048e8" stroke-width="2" opacity="1.0" />
+<rect x="0" y="380" width="200" height="70" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1.0" />
+<rect x="240" y="380" width="200" height="70" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1.0" />
+<rect x="480" y="380" width="200" height="70" rx="8" ry="8" fill="#b2f2bb" stroke="#2f9e44" stroke-width="2" opacity="1.0" />
+<text x="100.0" y="42.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">React App</text>
+<text x="340.0" y="42.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">Next.js SSR</text>
+<text x="100.0" y="232.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">API Server</text>
+<text x="341.70000000000005" y="232.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">Auth Service</text>
+<text x="583.4000000000001" y="232.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">Job Queue</text>
+<text x="100.0" y="422.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">PostgreSQL</text>
+<text x="340.0" y="422.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">Redis</text>
+<text x="580.0" y="422.0" font-size="20" fill="#1e1e1e" text-anchor="middle" opacity="1.0" font-family="Arial, sans-serif">S3 Storage</text>
+<defs><marker id="arrowhead-end-arrow_e6pFrlVaoh" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 100.0 70 L 100.0 190" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_e6pFrlVaoh)"  />
+<defs><marker id="arrowhead-end-arrow_woLKrauLub" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 240 35.0 L 200 225.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_woLKrauLub)"  />
+<defs><marker id="arrowhead-end-arrow_zq7kfPa1pR" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 200 225.0 L 240 225.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_zq7kfPa1pR)"  />
+<defs><marker id="arrowhead-end-arrow_OoVjPe4Ags" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 100.0 260 L 100.0 380" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_OoVjPe4Ags)"  />
+<defs><marker id="arrowhead-end-arrow_OjQsqZNG2z" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 200 225.0 L 240 415.0" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_OjQsqZNG2z)"  />
+<defs><marker id="arrowhead-end-arrow_i7vRYV2rgC" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto"><polygon points="0 0, 10 3.5, 0 7" fill="#1e1e1e" /></marker></defs><path d="M 583.4000000000001 260 L 580.0 380" fill="none" stroke="#1e1e1e" stroke-width="2" opacity="1.0"  marker-end="url(#arrowhead-end-arrow_i7vRYV2rgC)"  />
+</svg>
